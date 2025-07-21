@@ -185,23 +185,31 @@ const handleSubmit = async (e) => {
   // Match the exact field names your backend expects
   const payload = {
     service_id: selectedService.id,
-    petName: formData.petName,           // Backend expects "petName"
-    petType: formData.petType,           // Backend expects "petType"
-    reason: formData.notes,              // Map notes to reason
-    ownerName: userProfile?.name || '',  // Add owner name from user profile
-    phone: formData.emergencyContact,    // Map emergency contact to phone
-    email: userProfile?.email || '',     // Add email from user profile
+    petName: formData.petName || '',           
+    petType: formData.petType || '',           
+    reason: formData.notes || '',              
+    ownerName: userProfile?.name || userProfile?.username || 'Pet Owner',  
+    phone: formData.emergencyContact || '',    
+    email: userProfile?.email || '',     
     date: formData.date,
     time: formData.time,
-    status: 'pending'
+    status: 'pending',
+    // Add these missing fields that your backend might expect
+    vet_id: null,
+    pet_weight: formData.petWeight || '',
+    vaccination: formData.vaccination || 'unknown'
   };
 
   try {
+    console.log('Sending payload:', payload); // Debug log
+    
     const { data } = await axios.post(
       "https://pawprox-6dd216fb1ef5.herokuapp.com/api/bookings",
       payload,
       { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } } 
     );
+
+    console.log('Server response:', data); // Debug log
 
     const bookingIdentifier = data.bookingId;
 
@@ -235,7 +243,13 @@ const handleSubmit = async (e) => {
 
   } catch (err) {
     console.error("Booking API error:", err);
-    setError("Sorry, we couldn't complete your booking. Please try again.");
+    console.error("Error response:", err.response?.data); // More detailed error logging
+    
+    if (err.response?.data?.error) {
+      setError(err.response.data.error);
+    } else {
+      setError("Sorry, we couldn't complete your booking. Please try again.");
+    }
   }
 };
 
