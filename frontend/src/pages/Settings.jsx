@@ -115,12 +115,95 @@ const Settings = () => {
     fetchData();
   }, [token, navigate]);
   
-  // Handler for switching active mode (user/vendor)
-  const handleRoleSwitch = (newRole) => {
-    setActiveRole(newRole);
-    localStorage.setItem('activeRole', newRole);
-    toast.success(`Switched to ${newRole} mode`);
-  };
+const handleRoleSwitch = (newRole) => {
+  // If trying to switch to vendor mode, check if they can
+  if (newRole === 'vendor') {
+    // Case 1: User has no vendor record - show the form
+    if (!user.vendor) {
+      handleShowVendorModal();
+      return;
+    }
+    
+    // Case 2: User has vendor record but it's still pending - prevent switch
+    if (user.vendor && user.vendor.approval_status === 'pending') {
+      toast.error('Your vendor application is still pending approval. You cannot switch to vendor mode yet.');
+      return;
+    }
+    
+    // Case 3: User has approved vendor record - allow switch
+    if (user.vendor && user.vendor.approval_status === 'approved') {
+      setActiveRole(newRole);
+      localStorage.setItem('activeRole', newRole);
+      toast.success(`Switched to ${newRole} mode`);
+      return;
+    }
+    
+    // Case 4: Any other status (rejected, etc.) - show form to reapply
+    if (user.vendor && user.vendor.approval_status !== 'approved') {
+      toast.error('Your previous vendor application was not approved. Please submit a new application.');
+      handleShowVendorModal();
+      return;
+    }
+  }
+  
+  // For switching to user mode, always allow
+  setActiveRole(newRole);
+  localStorage.setItem('activeRole', newRole);
+  toast.success(`Switched to ${newRole} mode`);
+};
+
+// Update the vendor form submission to handle the approval status properly
+const handleVendorSubmit = async (e) => {
+  e.preventDefault();
+  try { 
+    const response = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/become', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(vendorForm)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to submit vendor application');
+    }
+    
+    const vendorData = await response.json();
+    
+    // Update user with new vendor data
+    const updatedUser = { 
+      ...user, 
+      vendor: {
+        ...vendorData,
+        approval_status: 'pending' // Ensure status is pending
+      }
+    };
+    
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Close modal and reset form
+    setShowVendorModal(false);
+    setVendorForm({
+      business_name: '',
+      services: '',
+      phone: '',
+      business_address: '',
+      years_experience: ''
+    });
+    
+    // Stay in user mode since application is pending
+    setActiveRole('user');
+    localStorage.setItem('activeRole', 'user');
+    
+    toast.success("Your vendor application has been submitted and is pending review. You'll be able to switch to vendor mode once approved.");
+    
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to submit vendor application. Please try again later.");
+  }
+};
   
   // Handlers for vendor modal
   const handleShowVendorModal = () => {
@@ -132,33 +215,7 @@ const Settings = () => {
     setVendorForm(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleVendorSubmit = async (e) => {
-    e.preventDefault();
-    try { 
-      const response = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/become', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(vendorForm)
-      });
-      if (!response.ok) {
-        throw new Error('Failed to submit vendor application');
-      }
-      const vendorData = await response.json();
-      const updatedUser = { ...user, role: 'vendor', vendor: vendorData };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      localStorage.setItem('isVendor', 'true');
-      handleRoleSwitch('vendor');
-      setShowVendorModal(false);
-      toast.success("Your vendor application has been submitted and is pending review.");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to submit vendor application. Please try again later.");
-    }
-  };
+
   
   // Profile update handlers
   const handleUserChange = (e) => {
@@ -575,111 +632,120 @@ const Settings = () => {
                         </form>
                       </div>
                     ) : (
-                      <div className="bg-white p-6 rounded-lg">
-                        <h3 className="text-xl font-semibold mb-4">Account Access Mode</h3>
-                        <div className="bg-gray-50 p-6 rounded-lg mb-6">
-                          <h4 className="font-medium text-gray-700 mb-2">Current Mode</h4>
-                          <div className="flex items-center">
-                            <div className={`w-3 h-3 rounded-full ${activeRole === 'user' ? 'bg-green-500' : 'bg-purple-500'} mr-2`}></div>
-                            <p className="font-semibold">
-                              {activeRole === 'user' ? 'User Account' : 'Vendor Account'}
-                            </p>
-                          </div>
-                          {user.role === 'vendor' && (
-                            <div className="mt-4">
-                              {user.vendor && user.vendor.approval_status === 'pending' ? (
-                                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                                  <div className="flex">
-                                    <div className="flex-shrink-0">
-                                      <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                      </svg>
-                                    </div>
-                                    <div className="ml-3">
-                                      <p className="text-sm text-yellow-700">
-                                        Your vendor application is pending review by our team.
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="mt-4">
-                                  <p className="text-gray-600 mb-4">
-                                    Switch between user and vendor mode to access different features.
-                                  </p>
-                                  <div className="flex gap-4">
-                                    <button
-                                      onClick={() => handleRoleSwitch('user')}
-                                      className={`flex-1 py-2 px-4 rounded-md transition ${
-                                        activeRole === 'user'
-                                          ? 'bg-green-600 text-white'
-                                          : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                                      }`}
-                                    >
-                                      User Mode
-                                    </button>
-                                    <button
-                                      onClick={() => handleRoleSwitch('vendor')}
-                                      className={`flex-1 py-2 px-4 rounded-md transition ${
-                                        activeRole === 'vendor'
-                                          ? 'bg-purple-600 text-white'
-                                          : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                                      }`}
-                                    >
-                                      Vendor Mode
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      {user.role === 'user' && (
-                        user.vendor === null
-                          ? (
-                            // No vendor record: show Apply card
-                            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-100">
-                              <h4 className="text-lg font-semibold text-purple-800 mb-2">
-                                Become a Service Vendor
-                              </h4>
-                              <p className="text-gray-700 mb-4">
-                                Start offering pet services to our community. Become a vendor to list your services and connect with pet owners.
-                              </p>
-                              <button
-                                onClick={handleShowVendorModal}
-                                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-md transition"
-                              >
-                                Apply Now
-                              </button>
-                            </div>
-                          )
-                          : (
-                            // Vendor exists: just let them switch modes
-                            <div className="flex gap-4">
-                              <button
-                                onClick={() => handleRoleSwitch('user')}
-                                className={`flex-1 py-2 px-4 rounded-md transition ${
-                                  activeRole === 'user'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                                }`}
-                              >
-                                User Mode
-                              </button>
-                              <button
-                                onClick={() => handleRoleSwitch('vendor')}
-                                className={`flex-1 py-2 px-4 rounded-md transition ${
-                                  activeRole === 'vendor'
-                                    ? 'bg-purple-600 text-white'
-                                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                                }`}
-                              >
-                                Vendor Mode
-                              </button>
-                            </div>
-                          )
-                      )}
-                      </div>
+  <div className="bg-white p-6 rounded-lg">
+    <h3 className="text-xl font-semibold mb-4">Account Access Mode</h3>
+    <div className="bg-gray-50 p-6 rounded-lg mb-6">
+      <h4 className="font-medium text-gray-700 mb-2">Current Mode</h4>
+      <div className="flex items-center">
+        <div className={`w-3 h-3 rounded-full ${activeRole === 'user' ? 'bg-green-500' : 'bg-purple-500'} mr-2`}></div>
+        <p className="font-semibold">
+          {activeRole === 'user' ? 'User Account' : 'Vendor Account'}
+        </p>
+      </div>
+      
+      {/* Show different UI based on vendor status */}
+      {!user.vendor ? (
+        // No vendor record - show apply button
+        <div className="mt-4">
+          <p className="text-gray-600 mb-4">
+            You're currently in user mode. Apply to become a vendor to offer services.
+          </p>
+          <button
+            onClick={handleShowVendorModal}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-md transition"
+          >
+            Apply to Become Vendor
+          </button>
+        </div>
+      ) : user.vendor.approval_status === 'pending' ? (
+        // Pending application - show status
+        <div className="mt-4">
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700 font-medium mb-1">
+                  Vendor Application Pending
+                </p>
+                <p className="text-sm text-yellow-700">
+                  Your vendor application is being reviewed by our team. You'll be able to switch to vendor mode once approved.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4">
+            <button
+              disabled
+              className="bg-gray-300 text-gray-500 font-medium py-2 px-6 rounded-md cursor-not-allowed"
+            >
+              Vendor Mode (Pending Approval)
+            </button>
+          </div>
+        </div>
+      ) : user.vendor.approval_status === 'approved' ? (
+        // Approved vendor - show mode switcher
+        <div className="mt-4">
+          <p className="text-gray-600 mb-4">
+            Switch between user and vendor mode to access different features.
+          </p>
+          <div className="flex gap-4">
+            <button
+              onClick={() => handleRoleSwitch('user')}
+              className={`flex-1 py-2 px-4 rounded-md transition ${
+                activeRole === 'user'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+              }`}
+            >
+              User Mode
+            </button>
+            <button
+              onClick={() => handleRoleSwitch('vendor')}
+              className={`flex-1 py-2 px-4 rounded-md transition ${
+                activeRole === 'vendor'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+              }`}
+            >
+              Vendor Mode
+            </button>
+          </div>
+        </div>
+      ) : user.vendor.approval_status === 'rejected' ? (
+        // Rejected application - show reapply option
+        <div className="mt-4">
+          <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded mb-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700 font-medium mb-1">
+                  Vendor Application Rejected
+                </p>
+                <p className="text-sm text-red-700">
+                  Your previous vendor application was not approved. You can submit a new application.
+                </p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleShowVendorModal}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-md transition"
+          >
+            Submit New Application
+          </button>
+        </div>
+      ) : null}
+    </div>
+  </div>
+
                     )}
                   </div>
                 </div>
