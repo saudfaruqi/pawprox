@@ -141,7 +141,7 @@ const Signup = () => {
         localStorage.setItem("user", JSON.stringify(data.user));
 
         // Redirect straight to dashboard
-        navigate("/dashboard");
+        navigate("/");
       
     } catch (err) {
       console.error("Signup error:", err);
