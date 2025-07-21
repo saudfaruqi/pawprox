@@ -1,15 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from "react-router-dom";
 import '../../src/index.css';
 import PetProfileWizard from '../components/PetProfileWizard';
 import Header from '../components/Header';
 import TestimonialsCard from '../components/TestimonialsCard';
 
-import grid1 from '../images/grid1.jpeg';
-import grid2 from '../images/grid2.jpeg';
-import grid3 from '../images/grid3.jpeg';
-import grid4 from '../images/grid4.jpeg';
-
-import box from '../images/info1.png';
+import grid1 from '../images/three.jpg';
+import grid2 from '../images/two.jpg';
+import grid3 from '../images/one.jpg';
+import grid4 from '../images/four.jpg';
 
 import { 
   ChevronUp, 
@@ -21,11 +20,7 @@ import {
   AlertTriangle, 
   Dog, 
   Cat, 
-  Star,
-  Heart,
-  Calendar,
-  PawPrint,
-  Bell
+  Star
 } from 'lucide-react';
 import Footer from '../components/Footer';
 import BlogsAndUi from "../components/BlogsAndUi";
@@ -33,9 +28,6 @@ import HeroSection from '../components/HeroSection';
 import PetCareEssentials from '../components/PetCareEssentials';
 
 const WebsiteLayout = () => {
-    // Reference for the 3D container
-    const containerRef = useRef(null);
-    const pawModelsRef = useRef([]);
 
     // Authentication state with proper context management (would be better with React Context)
     const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -174,34 +166,30 @@ const WebsiteLayout = () => {
     const boxData = [
         { 
             id: 1, 
-            title: "Diet and Nutrition", 
-            description: "Get personalized diet recommendations based on your pet's breed, age, and health conditions.",
+            title: "Activity and Training", 
+            description: "Monitor exercise, set training goals, and track progress with our interactive tools.",
             image: grid1,
-            ctaText: "Get Recommendations",
             category: "health" 
         },
         { 
             id: 2, 
-            title: "Health Tracker", 
-            description: "Track vaccinations, medications, and vet appointments with smart reminders.",
+            title: "Pet Profiles", 
+            description: "Create detailed profiles with medical history, preferences, and memorable moments.",
             image: grid2,
-            ctaText: "Start Tracking",
             category: "health" 
         },
         { 
             id: 3, 
-            title: "Activity and Training", 
-            description: "Monitor exercise, set training goals, and track progress with our interactive tools.",
+            title: "Health Tracker", 
+            description: "Track vaccinations, medications, and vet appointments with smart reminders.",
             image: grid3,
-            ctaText: "Explore Activities",
             category: "training" 
         },
         { 
             id: 4, 
-            title: "Pet Profiles", 
-            description: "Create detailed profiles with medical history, preferences, and memorable moments.",
+            title: "Diet and Nutrition", 
+            description: "Get personalized diet recommendations based on your pet's breed, age, and health conditions.",
             image: grid4,
-            ctaText: "Create Profile",
             category: "community" 
         },
     ];
@@ -494,7 +482,7 @@ const WebsiteLayout = () => {
                             </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 m-4 sm:m-8 lg:max-h-[100vh] h-fit overflow-hidden">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 m-4 sm:m-8 lg:max-h-[120vh] h-fit overflow-hidden">
                             {boxData.filter(box => 
                                 activeTab === 'all' || box.category === activeTab
                             ).map((box, index) => (
@@ -513,7 +501,7 @@ const WebsiteLayout = () => {
                                     />
 
                                     {/* Improved hover overlay with gradient */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl">
                                         <div className="absolute bottom-0 p-6 text-white">
                                             <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-2">
                                                 {box.title}
@@ -521,9 +509,6 @@ const WebsiteLayout = () => {
                                             <p className="text-sm sm:text-base lg:text-lg mb-4">
                                                 {box.description}
                                             </p>
-                                            <button className={`px-4 py-2 ${themeColors.primary} ${themeColors.primaryHover} text-white rounded-full transition-all duration-300 transform hover:scale-105`}>
-                                                {box.ctaText}
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -547,12 +532,16 @@ const WebsiteLayout = () => {
                             Start your journey towards better pet care today. Join thousands of happy pet owners in our community.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link to="/login">
                             <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
                                 Get Started Now
                             </button>
+                            </Link>
+                            <Link to="/">
                             <button className="bg-transparent border-2 border-white hover:bg-white hover:text-black text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300">
                                 Take a Tour
                             </button>
+                            </Link>
                         </div>
                     </div>
                 </section>
@@ -609,7 +598,7 @@ const WebsiteLayout = () => {
             {showScrollTop && (
                 <button
                     onClick={scrollToTop}
-                    className="fixed bottom-8 right-8 p-2 lg:p-4 bg-[#19897F] text-white rounded-full shadow-lg hover:bg-[#2E6166] transition-all duration-300 transform hover:scale-110 animate-bounce"
+                    className="z-[999999] fixed bottom-1 right-1 p-2 lg:p-2 bg-[#19897F] text-white rounded-full shadow-lg hover:bg-[#2E6166] transition-all duration-300 transform hover:scale-110 animate-bounce"
                 >
                     <ChevronUp className="h-6 w-6" />
                 </button>

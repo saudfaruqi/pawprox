@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -109,16 +110,7 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Switch role function: redirect to "/" for regular users and "/vendor/dashboard" for vendors.
-  const switchRole = () => {
-    const newRole = activeRole === "user" ? "vendor" : "user";
-    localStorage.setItem("activeRole", newRole);
-    if (newRole === "vendor") {
-      navigate("/vendor/dashboard");
-    } else {
-      navigate("/");
-    }
-  };
+
 
   // Navigation items for regular users
   const userNavItems = [
@@ -166,11 +158,6 @@ const Header = () => {
       children: [
         { name: "About Us", href: "/about", description: "Learn about our mission" },
         { name: "Contact", href: "/contact", description: "Get in touch with our team" },
-        {
-          name: "Chatbot Help",
-          href: "/chatbot",
-          description: "Get instant answers to your questions",
-        },
         {
           name: "Terms & Conditions",
           href: "/terms",
@@ -246,7 +233,7 @@ const Header = () => {
           : "bg-white backdrop-blur-xl h-[100px]"
       }`}
     >
-      <div className="container mx-auto px-4 h-full">
+      <div className="container mx-auto h-full">
         <div className="flex items-center justify-between h-full">
           {/* Left Section: Logo */}
           <div className="flex items-center">
@@ -364,15 +351,6 @@ const Header = () => {
                       <Settings className="w-4 h-4" />
                       <span>Settings</span>
                     </Link>
-                    <button
-                      onClick={switchRole}
-                      className="flex items-center space-x-2 w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50"
-                    >
-                      <User className="w-4 h-4" />
-                      <span>
-                        Switch to {activeRole === "user" ? "Vendor" : "Customer"}
-                      </span>
-                    </button>
                     <Link
                       to="/order-history"
                       onClick={closeAllDropdowns}
@@ -549,15 +527,6 @@ const Header = () => {
                       <span>Logout</span>
                     </button>
                   </div>
-                  <button
-                    onClick={switchRole}
-                    className="w-full mt-3 flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-lg"
-                  >
-                    <User className="w-4 h-4" />
-                    <span>
-                      Switch to {activeRole === "user" ? "Vendor" : "Customer"}
-                    </span>
-                  </button>
                 </>
               ) : (
                 <div className="grid grid-cols-1 gap-3">

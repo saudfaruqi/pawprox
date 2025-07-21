@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { toast } from 'react-toastify';
@@ -15,9 +15,11 @@ const Settings = () => {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
   
+
   // For editing user profile
   const [editingProfile, setEditingProfile] = useState(false);
-  const [editedUser, setEditedUser] = useState({});
+  // start with whatever we already have for the user (including phone)
+  const [editedUser, setEditedUser] = useState(storedUser || {});
   
   // Active mode: 'user' or 'vendor'
   const [activeRole, setActiveRole] = useState(localStorage.getItem('activeRole') || 'user');
@@ -77,16 +79,17 @@ const Settings = () => {
           throw new Error('Failed to fetch user profile');
         }
         
-        const userData = await userRes.json();
-        if (localStorage.getItem('isVendor') === 'true') {
-          userData.user.role = 'vendor';
+        const { user: freshUser, vendor } = await userRes.json();
+        const normalizedUser = {
+          ...freshUser,
+          vendor,          // null if they’re not a vendor, or the row if they are
+        };
+        setUser(normalizedUser);
+        setEditedUser(normalizedUser);
+        if (normalizedUser.preferences) {
+          setPreferences(JSON.parse(normalizedUser.preferences));
         }
-        setUser(userData.user);
-        setEditedUser(userData.user);
-        if (userData.user.preferences) {
-          setPreferences(JSON.parse(userData.user.preferences));
-        }
-        
+              
         // Fetch pet profiles
         const petRes = await fetch('http://localhost:5001/api/pets', {
           headers: {
@@ -175,6 +178,7 @@ const Settings = () => {
       const formData = new FormData();
       formData.append('name', editedUser.name);
       formData.append('email', editedUser.email);
+      formData.append('phone', editedUser.phone);
       if (editedUser.profilePic instanceof File) {
         formData.append('profilePic', editedUser.profilePic);
       }
@@ -276,9 +280,12 @@ const Settings = () => {
       [name]: type === 'checkbox' ? checked : value
     }));
   };
+
+  const [prefStatus, setPrefStatus] = useState('');
   
   const handlePreferencesUpdate = async (e) => {
     e.preventDefault();
+
     try {
       const res = await fetch('http://localhost:5001/api/users/preferences', {
         method: 'PUT',
@@ -288,14 +295,38 @@ const Settings = () => {
         },
         body: JSON.stringify({ preferences })
       });
+
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to update preferences");
+        throw new Error(errorData.error || 'Failed to update preferences');
       }
-      toast.success("Preferences updated successfully!");
+
+      // Pull the canonical prefs back from the server
+      const { preferences: savedPrefs } = await res.json();
+
+      // 1) Update React state
+      setPreferences(savedPrefs);
+
+      // 2) Merge into your user object & persist
+      const updatedUser = {
+        ...user,
+        preferences: JSON.stringify(savedPrefs),
+      };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      // 3) Show inline status message
+      setPrefStatus('Preferences saved successfully!');
+
+      // 4) Optionally clear the message after 3s
+      setTimeout(() => setPrefStatus(''), 3000);
+
+      // 5) Also fire your toast if you like
+      toast.success('Preferences updated successfully!');
+
     } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Failed to update preferences");
+      console.error('Preferences update error:', err);
+      toast.error(err.message || 'Failed to update preferences');
     }
   };
 
@@ -409,10 +440,17 @@ const Settings = () => {
                         )}
                       </div>
                       <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
-                      <p className="text-gray-600 mb-4">{user.email}</p>
+                      <p className="text-gray-600 mb-2">{user.email}</p>
+                      <p className="text-gray-600 mb-4">{user.phone || '— no phone on file —'}</p>
                       <p className="text-sm text-gray-500 mb-4">
-                        Member since {new Date(user.created_at || Date.now()).toLocaleDateString()}
+                        Member since{" "}
+                        {new Date(user.created_at).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric"
+                        })}
                       </p>
+
                       
                       {!editingProfile ? (
                         <button
@@ -468,6 +506,21 @@ const Settings = () => {
                               value={editedUser.email || ''}
                               onChange={handleUserChange}
                               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              required
+                            />
+                          </div>
+                          {/* ← New Phone Field */}
+                          <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                              Phone Number
+                            </label>
+                            <input
+                              type="tel"
+                              name="phone"
+                              value={editedUser.phone || ''}
+                              onChange={handleUserChange}
+                              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="+1 (555) 123‑4567"
                               required
                             />
                           </div>
@@ -581,22 +634,51 @@ const Settings = () => {
                             </div>
                           )}
                         </div>
-                        {user.role !== 'vendor' && (
-                          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-100">
-                            <h4 className="text-lg font-semibold text-purple-800 mb-2">
-                              Become a Service Vendor
-                            </h4>
-                            <p className="text-gray-700 mb-4">
-                              Start offering pet services to our community. Become a vendor to list your services and connect with pet owners.
-                            </p>
-                            <button
-                              onClick={handleShowVendorModal}
-                              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-md transition"
-                            >
-                              Apply Now
-                            </button>
-                          </div>
-                        )}
+                      {user.role === 'user' && (
+                        user.vendor === null
+                          ? (
+                            // No vendor record: show Apply card
+                            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-100">
+                              <h4 className="text-lg font-semibold text-purple-800 mb-2">
+                                Become a Service Vendor
+                              </h4>
+                              <p className="text-gray-700 mb-4">
+                                Start offering pet services to our community. Become a vendor to list your services and connect with pet owners.
+                              </p>
+                              <button
+                                onClick={handleShowVendorModal}
+                                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-md transition"
+                              >
+                                Apply Now
+                              </button>
+                            </div>
+                          )
+                          : (
+                            // Vendor exists: just let them switch modes
+                            <div className="flex gap-4">
+                              <button
+                                onClick={() => handleRoleSwitch('user')}
+                                className={`flex-1 py-2 px-4 rounded-md transition ${
+                                  activeRole === 'user'
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                }`}
+                              >
+                                User Mode
+                              </button>
+                              <button
+                                onClick={() => handleRoleSwitch('vendor')}
+                                className={`flex-1 py-2 px-4 rounded-md transition ${
+                                  activeRole === 'vendor'
+                                    ? 'bg-purple-600 text-white'
+                                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                }`}
+                              >
+                                Vendor Mode
+                              </button>
+                            </div>
+                          )
+                      )}
                       </div>
                     )}
                   </div>
@@ -680,6 +762,12 @@ const Settings = () => {
                   >
                     Update Preferences
                   </button>
+
+                  {prefStatus && (
+                    <p className="mt-3 text-green-600">
+                      {prefStatus}
+                    </p>
+                  )}
                 </form>
               </div>
             )}
@@ -695,123 +783,123 @@ const Settings = () => {
                 </div>
                 {/* For new pet creation you can still link to a separate add page */}
                 <button 
-  onClick={() => {
-    setShowPetWizard(true);
-    setPetToEdit(null); // ensure we're adding a new pet, not editing
-  }}
-  className="bg-white text-green-600 hover:bg-green-50 px-4 py-2 rounded-md font-medium transition shadow-sm"
->
-  Add New Pet
-</button>
+                onClick={() => {
+                  setShowPetWizard(true);
+                  setPetToEdit(null); // ensure we're adding a new pet, not editing
+                }}
+                className="bg-white text-green-600 hover:bg-green-50 px-4 py-2 rounded-md font-medium transition shadow-sm"
+              >
+                Add New Pet
+              </button>
 
               </div>
             </div>
 
             <div className="p-6">
-            {pets && pets.length > 0 ? (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {pets.map((pet) => (
-      <div
-        key={pet.id}
-        className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition"
-      >
-        {pet.photo && (
-          <div className="h-48 overflow-hidden">
-            <img
-              src={
-                pet.photo.startsWith("data:")
-                  ? pet.photo
-                  : `http://localhost:5001/${pet.photo}`
-              }
-              alt={`${pet.name}'s photo`}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-        <div className="p-4">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-xl font-semibold text-gray-800">
-              {pet.name || "N/A"}
-            </h3>
-            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-              {pet.type || "N/A"}
-            </span>
-          </div>
-          <div className="space-y-2 text-sm text-gray-600 mb-4">
-            <p>
-              <span className="font-medium">Breed:</span>{" "}
-              {pet.breed || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Age:</span>{" "}
-              {pet.age || "N/A"} {pet.age ? "years" : ""}
-            </p>
-            <p>
-              <span className="font-medium">Sex:</span>{" "}
-              {pet.sex || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Weight:</span>{" "}
-              {(pet.weight !== undefined && pet.weight !== null)
-                ? pet.weight
-                : "N/A"}{" "}
-              {pet.weight || pet.weight === 0 ? "kg" : ""}
-            </p>
-            <p>
-              <span className="font-medium">Color:</span>{" "}
-              {pet.color || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Microchipped:</span>{" "}
-              {pet.microchipped ? "Yes" : "No"}
-            </p>
-            <p>
-              <span className="font-medium">Lost/Missing:</span>{" "}
-              {pet.lost_status ? "Yes" : "No"}
-            </p>
-            <p>
-              <span className="font-medium">Vaccinations:</span>{" "}
-              {Array.isArray(pet.vaccinations)
-                ? pet.vaccinations.join(", ")
-                : pet.vaccinations || "None"}
-            </p>
+              {pets && pets.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {pets.map((pet) => (
+                    <div
+                      key={pet.id}
+                      className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition"
+                    >
+                      {pet.photo && (
+                        <div className="h-48 overflow-hidden">
+                          <img
+                            src={
+                              pet.photo.startsWith("data:")
+                                ? pet.photo
+                                : `http://localhost:5001/${pet.photo}`
+                            }
+                            alt={`${pet.name}'s photo`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-xl font-semibold text-gray-800">
+                            {pet.name || "N/A"}
+                          </h3>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                            {pet.type || "N/A"}
+                          </span>
+                        </div>
+                        <div className="space-y-2 text-sm text-gray-600 mb-4">
+                          <p>
+                            <span className="font-medium">Breed:</span>{" "}
+                            {pet.breed || "N/A"}
+                          </p>
+                          <p>
+                            <span className="font-medium">Age:</span>{" "}
+                            {pet.age || "N/A"} {pet.age ? "years" : ""}
+                          </p>
+                          <p>
+                            <span className="font-medium">Sex:</span>{" "}
+                            {pet.sex || "N/A"}
+                          </p>
+                          <p>
+                            <span className="font-medium">Weight:</span>{" "}
+                            {(pet.weight !== undefined && pet.weight !== null)
+                              ? pet.weight
+                              : "N/A"}{" "}
+                            {pet.weight || pet.weight === 0 ? "kg" : ""}
+                          </p>
+                          <p>
+                            <span className="font-medium">Color:</span>{" "}
+                            {pet.color || "N/A"}
+                          </p>
+                          <p>
+                            <span className="font-medium">Microchipped:</span>{" "}
+                            {pet.microchipped ? "Yes" : "No"}
+                          </p>
+                          <p>
+                            <span className="font-medium">Lost/Missing:</span>{" "}
+                            {pet.lost_status ? "Yes" : "No"}
+                          </p>
+                          <p>
+                            <span className="font-medium">Vaccinations:</span>{" "}
+                            {Array.isArray(pet.vaccinations)
+                              ? pet.vaccinations.join(", ")
+                              : pet.vaccinations || "None"}
+                          </p>
 
-            <p>
-              <span className="font-medium">Allergies:</span>{" "}
-              {pet.allergies || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium">Health:</span>{" "}
-              {pet.health_status || "N/A"}
-            </p>
-          </div>
-          <div className="flex justify-between pt-3 border-t border-gray-100">
-            <button
-              onClick={() => handleEditPet(pet)}
-              className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-            >
-              Edit Profile
-            </button>
-            <button
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Are you sure you want to delete this pet profile?"
-                  )
-                ) {
-                  handleDeletePet(pet.id);
-                }
-              }}
-              className="text-red-600 hover:text-red-800 font-medium text-sm"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-) : (
+                          <p>
+                            <span className="font-medium">Allergies:</span>{" "}
+                            {pet.allergies || "N/A"}
+                          </p>
+                          <p>
+                            <span className="font-medium">Health:</span>{" "}
+                            {pet.health_status || "N/A"}
+                          </p>
+                        </div>
+                        <div className="flex justify-between pt-3 border-t border-gray-100">
+                          <button
+                            onClick={() => handleEditPet(pet)}
+                            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                          >
+                            Edit Profile
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  "Are you sure you want to delete this pet profile?"
+                                )
+                              ) {
+                                handleDeletePet(pet.id);
+                              }
+                            }}
+                            className="text-red-600 hover:text-red-800 font-medium text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
                 <div className="text-center py-12">
                   <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -840,19 +928,19 @@ const Settings = () => {
       </div>
 
       {showPetWizard && (
-  <PetProfileWizard 
-    onComplete={handlePetWizardComplete}
-    onSkip={() => {
-      setShowPetWizard(false);
-      setPetToEdit(null);
-    }}
-    onClose={() => {
-      setShowPetWizard(false);
-      setPetToEdit(null);
-    }}
-    initialData={petToEdit} // when null, wizard works in add mode
-  />
-)}
+        <PetProfileWizard 
+          onComplete={handlePetWizardComplete}
+          onSkip={() => {
+            setShowPetWizard(false);
+            setPetToEdit(null);
+          }}
+          onClose={() => {
+            setShowPetWizard(false);
+            setPetToEdit(null);
+          }}
+          initialData={petToEdit} // when null, wizard works in add mode
+        />
+      )}
 
       
       {/* Vendor Application Modal */}

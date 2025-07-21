@@ -103,8 +103,8 @@ const Cart = () => {
                       </div>
                       
                       <div className="mt-4 sm:mt-0 flex flex-col items-end">
-                        <div className="text-lg font-medium text-gray-800">${(item.price * item.quantity).toFixed(2)}</div>
-                        <div className="text-sm text-gray-500 mb-4">${Number(item.price).toFixed(2)} each</div>
+                        <div className="text-lg font-medium text-gray-800">Rs {(item.price * item.quantity).toFixed(2)}</div>
+                        <div className="text-sm text-gray-500 mb-4">Rs {Number(item.price).toFixed(2)} each</div>
                         <button
                           onClick={() => removeFromCart(item.id)}
                           className="text-red-600 hover:text-red-800 transition-colors flex items-center text-sm"
@@ -150,7 +150,7 @@ const Cart = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal ({totalItems} {totalItems === 1 ? 'item' : 'items'})</span>
-                    <span className="text-gray-800 font-medium">${totalPrice.toFixed(2)}</span>
+                    <span className="text-gray-800 font-medium">Rs {totalPrice.toFixed(2)}</span>
                   </div>
                   
                   <div className="flex justify-between">
@@ -166,7 +166,7 @@ const Cart = () => {
                   <div className="border-t pt-4 mt-4">
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold text-gray-800">Total</span>
-                      <span className="text-xl font-bold text-gray-800">${totalPrice.toFixed(2)}</span>
+                      <span className="text-xl font-bold text-gray-800">Rs {totalPrice.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

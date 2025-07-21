@@ -67,12 +67,29 @@ const getIcon = (type) => {
 };
 
 export default function TestimonialSlider() {
-  // Set itemsPerPage to 2 so two testimonials are visible.
-  const itemsPerPage = 2;
+  // Responsive itemsPerPage state.
+  const [itemsPerPage, setItemsPerPage] = useState(1);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [filterType, setFilterType] = useState('all');
+
+  // Update itemsPerPage based on window size.
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setItemsPerPage(2);
+      } else {
+        setItemsPerPage(1);
+      }
+    };
+
+    // Call once to set initial state.
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const filteredTestimonials = filterType === 'all'
     ? testimonials
@@ -147,9 +164,9 @@ export default function TestimonialSlider() {
     }
   };
 
-  // Each card takes 50% width so that two are visible.
+  // Each card takes 100% width on small screens and 50% on large screens.
   const TestimonialCard = ({ testimonial }) => (
-    <div className="flex-none w-[50%] px-2 py-4">
+    <div className="flex-none w-[100%] lg:w-[50%] px-2 py-4">
       <div
         className={`bg-gradient-to-br ${getBackgroundGradient(testimonial.type)}
           border ${getBorderColor(testimonial.type)} rounded-2xl p-6 lg:p-8 shadow-sm
@@ -238,7 +255,7 @@ export default function TestimonialSlider() {
               <div
                 className="flex transition-transform duration-500"
                 style={{
-                  // Each testimonial is 50% width so move by 50% per index.
+                  // Adjust translateX based on itemsPerPage.
                   transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)`,
                 }}
               >

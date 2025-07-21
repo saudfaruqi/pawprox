@@ -11,7 +11,6 @@ import {
   Minus,
   Info,
   Tag,
-  Gift,
   Truck,
   Clock,
   ShieldCheck
@@ -37,8 +36,24 @@ const ProductDetails = () => {
   const [reviews, setReviews] = useState([]);
   const [isReviewFormVisible, setIsReviewFormVisible] = useState(false);
 
+
+  const [userReview, setUserReview] = useState(null);
+  const [editingReview, setEditingReview] = useState(null);
+  const [isEditFormVisible, setIsEditFormVisible] = useState(false);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+
   const { addToCart, isInCart, updateCartItemQuantity, cartItems } = useContext(CartContext);
   const navigate = useNavigate();
+
+
+
+  // Retrieve user details from localStorage if logged in
+  const user =
+    isLoggedIn && localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user"))
+      : null;
+
 
   // Format price safely
   const formatPrice = (price) => {
@@ -177,44 +192,269 @@ useEffect(() => {
     }
   };
 
-  // Handle review submission
-  const handleReviewSubmit = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem("token");
-    if (!token) {
-      showNotification("Please login to submit a review", "error");
-      return;
-    }
-    if (!reviewComment.trim()) {
-      showNotification("Please enter a review comment", "error");
-      return;
-    }
-    try {
-      await axios.post(
-        "http://localhost:5001/api/reviews",
+
+// Enhanced review submission handler with better error handling
+const handleReviewSubmit = async (e) => {
+  e.preventDefault();
+  
+  const token = localStorage.getItem("token");
+  console.log("Token exists:", !!token);
+  
+  if (!token) {
+    showNotification("Please login to submit a review", "error");
+    return;
+  }
+  
+  if (!reviewComment.trim()) {
+    showNotification("Please enter a review comment", "error");
+    return;
+  }
+  
+  // Debug logging
+  console.log("Submitting review with data:", {
+    productId: product.id,
+    rating: reviewRating,
+    comment: reviewComment,
+    editingReview: editingReview,
+    productType: typeof product.id,
+    ratingType: typeof reviewRating
+  });
+  
+  try {
+    const requestData = {
+      productId: Number(product.id), // Ensure it's a number
+      rating: Number(reviewRating),  // Ensure it's a number
+      comment: reviewComment.trim()
+    };
+    
+    console.log("Request data being sent:", requestData);
+    console.log("Request URL:", editingReview ? 
+      `http://localhost:5001/api/reviews/${editingReview.id}` : 
+      "http://localhost:5001/api/reviews"
+    );
+    
+    let response;
+    
+    if (editingReview) {
+      // Update existing review
+      console.log("Updating review with ID:", editingReview.id);
+      response = await axios.put(
+        `http://localhost:5001/api/reviews/${editingReview.id}`,
         {
-          productId: product.id,
-          rating: reviewRating,
-          comment: reviewComment
+          rating: Number(reviewRating),
+          comment: reviewComment.trim()
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         }
       );
-      // Refresh the reviews list after submitting a review
+    } else {
+      // Create new review
+      console.log("Creating new review");
+      response = await axios.post(
+        "http://localhost:5001/api/reviews",
+        requestData,
+        {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+    
+    console.log("Review submission response:", response.data);
+    showNotification(editingReview ? "Review updated successfully!" : "Review submitted successfully!");
+    
+    // Refresh reviews and user review
+    try {
       const { data } = await axios.get(`http://localhost:5001/api/reviews?productId=${product.id}`);
       setReviews(data.reviews);
-      showNotification("Review submitted successfully!");
-      setReviewComment("");
-      setReviewRating(5);
-      setIsReviewFormVisible(false);
-    } catch (error) {
-      console.error("Error submitting review:", error);
-      showNotification("Error submitting review, please try again.", "error");
+      await fetchUserReview();
+    } catch (refreshError) {
+      console.error("Error refreshing reviews:", refreshError);
+      // Don't show an error for this, the main operation succeeded
     }
+    
+    // Reset form
+    setReviewComment("");
+    setReviewRating(5);
+    setIsReviewFormVisible(false);
+    setIsEditFormVisible(false);
+    setEditingReview(null);
+    
+  } catch (error) {
+    console.error("Full error object:", error);
+    console.error("Error response:", error.response);
+    console.error("Error response data:", error.response?.data);
+    console.error("Error response status:", error.response?.status);
+    console.error("Error response headers:", error.response?.headers);
+    
+    let errorMsg = "Error processing review, please try again.";
+    
+    if (error.response) {
+      // Server responded with error status
+      const status = error.response.status;
+      const data = error.response.data;
+      
+      if (status === 401) {
+        errorMsg = "Please log in again to submit a review.";
+        // Optionally redirect to login
+        // navigate('/login');
+      } else if (status === 400) {
+        errorMsg = data.error || "Invalid review data. Please check your input.";
+      } else if (status === 404) {
+        errorMsg = editingReview ? "Review not found or you don't have permission to update it." : "Product not found.";
+      } else if (status === 500) {
+        errorMsg = "Server error. Please try again later.";
+      } else {
+        errorMsg = data.error || data.message || errorMsg;
+      }
+    } else if (error.request) {
+      // Request was made but no response received
+      errorMsg = "Unable to connect to server. Please check your internet connection.";
+    } else {
+      // Something else happened
+      errorMsg = "An unexpected error occurred. Please try again.";
+    }
+    
+    console.log("Showing error message:", errorMsg);
+    showNotification(errorMsg, "error");
+  }
+};
+
+// Enhanced delete review handler
+const handleDeleteReview = async (reviewId) => {
+  if (!window.confirm("Are you sure you want to delete this review?")) {
+    return;
+  }
+  
+  const token = localStorage.getItem("token");
+  
+  if (!token) {
+    showNotification("Please log in to delete your review", "error");
+    return;
+  }
+  
+  if (!reviewId) {
+    showNotification("Invalid review ID", "error");
+    return;
+  }
+  
+  try {
+    console.log("Deleting review with ID:", reviewId);
+    console.log("Using token:", !!token);
+    
+    const response = await axios.delete(
+      `http://localhost:5001/api/reviews/${reviewId}`,
+      {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    console.log("Delete response:", response.data);
+    showNotification("Review deleted successfully!", "info");
+    
+    // Refresh reviews and user review
+    try {
+      const { data } = await axios.get(`http://localhost:5001/api/reviews?productId=${product.id}`);
+      setReviews(data.reviews);
+      setUserReview(null);
+    } catch (refreshError) {
+      console.error("Error refreshing reviews after delete:", refreshError);
+      // The delete succeeded, so we can still show success
+    }
+    
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    console.error("Error response:", error.response);
+    
+    let errorMsg = "Error deleting review, please try again.";
+    
+    if (error.response) {
+      const status = error.response.status;
+      const data = error.response.data;
+      
+      if (status === 401) {
+        errorMsg = "Please log in again to delete your review.";
+      } else if (status === 404) {
+        errorMsg = "Review not found or you don't have permission to delete it.";
+      } else if (status === 400) {
+        errorMsg = data.error || "Invalid request. Unable to delete review.";
+      } else if (status === 500) {
+        errorMsg = "Server error. Please try again later.";
+      } else {
+        errorMsg = data.error || data.message || errorMsg;
+      }
+    } else if (error.request) {
+      errorMsg = "Unable to connect to server. Please check your internet connection.";
+    } else {
+      errorMsg = "An unexpected error occurred while deleting the review.";
+    }
+    
+    showNotification(errorMsg, "error");
+  }
+};
+
+// Enhanced fetch user review function
+const fetchUserReview = async () => {
+  if (!isLoggedIn || !product) return;
+  
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.log("No token found for fetching user review");
+      return;
+    }
+    
+    console.log("Fetching user review for product:", product.id);
+    
+    const response = await axios.get(
+      `http://localhost:5001/api/reviews/user/${product.id}`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+    
+    console.log("User review response:", response.data);
+    setUserReview(response.data.review);
+  } catch (error) {
+    if (error.response?.status === 404) {
+      // User hasn't reviewed this product yet - this is normal
+      console.log("No existing review found for user");
+      setUserReview(null);
+    } else {
+      console.error("Error fetching user review:", error);
+      // Don't show notification for this error as it's not critical
+    }
+  }
+};
+
+
+    // Handle edit review
+  const handleEditReview = (review) => {
+    setEditingReview(review);
+    setReviewRating(review.rating);
+    setReviewComment(review.comment);
+    setIsEditFormVisible(true);
+    setIsReviewFormVisible(false);
   };
+
+  // Cancel edit
+  const handleCancelEdit = () => {
+    setEditingReview(null);
+    setIsEditFormVisible(false);
+    setReviewComment("");
+    setReviewRating(5);
+  };
+
+
 
   // Mock product images (in production these come from product data)
   const productImages = product
@@ -693,112 +933,264 @@ useEffect(() => {
                   </div>
                 )}
 
-                {activeTab === "reviews" && (
-                  <div className="text-gray-700" id="reviews-section">
-                    <div className="grid md:grid-cols-3 gap-6 mb-8">
-                      <div className="md:col-span-1 bg-gray-50 p-4 rounded-lg">
-                        <div className="text-center mb-4">
-                          <div className="text-4xl font-bold text-gray-800">{averageRating.toFixed(1)}</div>
-                          <div className="flex justify-center my-2">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                size={16}
-                                className={star <= Math.round(averageRating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
-                              />
-                            ))}
-                          </div>
-                          <div className="text-sm text-gray-600">Based on {reviews.length} reviews</div>
-                        </div>
-                        <div className="space-y-2">
-                          {ratingDistribution.map(({ rating, count, percentage }) => (
-                            <div key={rating} className="flex items-center">
-                              <span className="w-6 text-sm">{rating}</span>
-                              <div className="flex-1 bg-gray-200 rounded h-2 mx-2">
-                                <div className="bg-[#2E6166] h-2 rounded" style={{ width: `${percentage}%` }}></div>
-                              </div>
-                              <span className="w-10 text-right text-sm">{count}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="md:col-span-2">
-                        {reviews.length > 0 ? (
-                          <div className="space-y-4">
-                            {reviews.map((review) => (
-                              <div key={review.id} className="border p-4 rounded-lg ">
-                                <div className="flex items-center mb-2">
-                                <img
-                                  src={getProfilePicUrl(review.profilePic)}
-                                  alt={review.username}
-                                  className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 shadow-sm mr-2"
-                                />
-                                  <span className="font-bold">{review.username}</span>
-                                  <div className="flex ml-2">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                      <Star
-                                        key={star}
-                                        size={16}
-                                        className={star <= review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
-                                      />
-                                    ))}
-                                  </div>
-                                </div>
-                                <p>{review.comment}</p>
-                                <span className="text-xs text-gray-500">
-                                  {new Date(review.created_at).toLocaleDateString()}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-8">
-                            <p className="text-gray-500">No reviews yet. Be the first to leave a review!</p>
-                          </div>
-                        )}
+
+{activeTab === "reviews" && (
+  <div className="text-gray-700" id="reviews-section">
+    <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="md:col-span-1 bg-gray-50 p-4 rounded-lg">
+        <div className="text-center mb-4">
+          <div className="text-4xl font-bold text-gray-800">{averageRating.toFixed(1)}</div>
+          <div className="flex justify-center my-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                size={16}
+                className={star <= Math.round(averageRating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+              />
+            ))}
+          </div>
+          <div className="text-sm text-gray-600">Based on {reviews.length} reviews</div>
+        </div>
+        <div className="space-y-2">
+          {ratingDistribution.map(({ rating, count, percentage }) => (
+            <div key={rating} className="flex items-center">
+              <span className="w-6 text-sm">{rating}</span>
+              <div className="flex-1 bg-gray-200 rounded h-2 mx-2">
+                <div className="bg-[#2E6166] h-2 rounded" style={{ width: `${percentage}%` }}></div>
+              </div>
+              <span className="w-10 text-right text-sm">{count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div className="md:col-span-2">
+        {reviews.length > 0 ? (
+          <div className="space-y-6">
+            {reviews.map((review) => {
+              // Check if this review belongs to the current user
+              const isUserReview = isLoggedIn && user && (
+                review.userId === user.id || 
+                review.user_id === user.id || 
+                review.username === user.username
+              );
+              
+              return (
+                <div 
+                  key={review.id} 
+                  className={`border p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 ${
+                    isUserReview ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'
+                  }`}
+                >
+                  <div className="flex items-start space-x-4 mb-4">
+                    <div className="flex-shrink-0">
+                      {review.profilePic ? (
+                        <img
+                          src={review.profilePic.startsWith('http') ? review.profilePic : `http://localhost:5001/${review.profilePic}`}
+                          alt={`${review.username}'s profile`}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center"
+                        style={{ display: review.profilePic ? 'none' : 'flex' }}
+                      >
+                        <span className="text-white font-semibold text-lg">
+                          {review.username?.charAt(0).toUpperCase() || '?'}
+                        </span>
                       </div>
                     </div>
-                    <div className="mt-8">
-                      <button
-                        onClick={() => setIsReviewFormVisible(!isReviewFormVisible)}
-                        className="bg-[#2E6166] text-white px-4 py-2 rounded-lg hover:bg-[#1a4e4b] transition duration-200"
-                      >
-                        {isReviewFormVisible ? "Cancel Review" : "Write a Review"}
-                      </button>
-                      {isReviewFormVisible && (
-                        <form onSubmit={handleReviewSubmit} className="mt-4 space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Rating</label>
-                            <select
-                              value={reviewRating}
-                              onChange={(e) => setReviewRating(parseInt(e.target.value))}
-                              className="mt-1 block w-full border-gray-300 rounded-md"
-                            >
-                              {[1, 2, 3, 4, 5].map((r) => (
-                                <option key={r} value={r}>
-                                  {r}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Review</label>
-                            <textarea
-                              value={reviewComment}
-                              onChange={(e) => setReviewComment(e.target.value)}
-                              className="mt-1 block w-full border-gray-300 rounded-md"
-                              rows="4"
-                              placeholder="Share your thoughts..."
-                            ></textarea>
-                          </div>
-                          <button type="submit" className="bg-[#2E6166] text-white px-4 py-2 rounded-lg hover:bg-[#1a4e4b] transition duration-200">
-                            Submit Review
-                          </button>
-                        </form>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center">
+                          <h4 className="font-semibold text-gray-900 truncate">
+                            {review.username}
+                            {isUserReview && (
+                              <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                Your Review
+                              </span>
+                            )}
+                          </h4>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <time className="text-sm text-gray-500 flex-shrink-0">
+                            {new Date(review.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                            {review.updated_at && review.updated_at !== review.created_at && (
+                              <span className="text-gray-400 ml-1">(edited)</span>
+                            )}
+                          </time>
+                          {/* Edit/Delete buttons for user's own review */}
+                          {isUserReview && (
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleEditReview(review)}
+                                className="text-sm text-blue-600 hover:text-blue-800 font-medium px-2 py-1 rounded hover:bg-blue-100 transition-colors"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteReview(review.id)}
+                                className="text-sm text-red-600 hover:text-red-800 font-medium px-2 py-1 rounded hover:bg-red-100 transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center mb-3">
+                        <div className="flex items-center space-x-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={18}
+                              className={
+                                star <= review.rating 
+                                  ? "text-yellow-400 fill-yellow-400" 
+                                  : "text-gray-300"
+                              }
+                            />
+                          ))}
+                        </div>
+                        <span className="ml-2 text-sm font-medium text-gray-700">
+                          {review.rating}/5
+                        </span>
+                      </div>
+                      
+                      {review.comment && (
+                        <p className="text-gray-700 leading-relaxed">
+                          {review.comment}
+                        </p>
                       )}
                     </div>
                   </div>
-                )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+            <div className="max-w-md mx-auto">
+              <Star size={48} className="text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No reviews yet
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Be the first to share your experience and help others make informed decisions.
+              </p>
+              <div className="text-sm text-gray-400">
+                Your review helps build trust in our community
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+    
+    {/* Review Form Section */}
+    <div className="mt-8">
+      {isLoggedIn ? (
+        <>
+          {/* Show "Write a Review" button only if user hasn't reviewed yet */}
+          {!reviews.some(review => 
+            user && (
+              review.userId === user.id || 
+              review.user_id === user.id || 
+              review.username === user.username
+            )
+          ) && !isEditFormVisible && (
+            <button
+              onClick={() => setIsReviewFormVisible(!isReviewFormVisible)}
+              className="bg-[#2E6166] text-white px-4 py-2 rounded-lg hover:bg-[#1a4e4b] transition duration-200"
+            >
+              {isReviewFormVisible ? "Cancel Review" : "Write a Review"}
+            </button>
+          )}
+          
+          {(isReviewFormVisible || isEditFormVisible) && (
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold mb-4">
+                {editingReview ? "Edit Your Review" : "Write a Review"}
+              </h3>
+              <form onSubmit={handleReviewSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                  <div className="flex items-center space-x-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewRating(star)}
+                        className="focus:outline-none"
+                      >
+                        <Star
+                          size={24}
+                          className={
+                            star <= reviewRating
+                              ? "text-yellow-400 fill-yellow-400 hover:scale-110 transition-transform"
+                              : "text-gray-300 hover:text-yellow-400 hover:scale-110 transition-all"
+                          }
+                        />
+                      </button>
+                    ))}
+                    <span className="ml-2 text-sm text-gray-600">({reviewRating}/5)</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Review</label>
+                  <textarea
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-[#2E6166] focus:border-transparent"
+                    rows="4"
+                    placeholder="Share your thoughts about this product..."
+                    required
+                  />
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    type="submit"
+                    className="bg-[#2E6166] text-white px-6 py-2 rounded-lg hover:bg-[#1a4e4b] transition duration-200"
+                  >
+                    {editingReview ? "Update Review" : "Submit Review"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={editingReview ? handleCancelEdit : () => setIsReviewFormVisible(false)}
+                    className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition duration-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg text-center">
+          <p className="text-blue-700 mb-2">Please log in to write a review</p>
+          <button
+            onClick={() => navigate('/login')}
+            className="bg-[#2E6166] text-white px-4 py-2 rounded-lg hover:bg-[#1a4e4b] transition duration-200"
+          >
+            Log In
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
 
                 {activeTab === "shipping" && (
                   <div className="text-gray-700">

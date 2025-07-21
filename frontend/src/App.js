@@ -3,6 +3,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import ErrorBoundary from "./ErrorBoundary";
 import PrivateRoute from "./PrivateRoute";
 import { Link } from "react-router-dom";
+import ResetPassword from './pages/ResetPassword';
+import 'leaflet/dist/leaflet.css';
+
 
 // Public pages
 const Home = lazy(() => import("./pages/Home"));
@@ -11,6 +14,7 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Login = lazy(() => import("./components/auth/Login"));
 const Logout = lazy(() => import("./components/auth/Logout"));
 const Signup = lazy(() => import("./components/auth/Signup"));
+
 const Terms = lazy(() => import("./pages/Terms"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const BlogContent = lazy(() => import("./pages/BlogContent"));
@@ -31,7 +35,6 @@ const Community = lazy(() => import("./pages/Community"));
 const PetCareServices = lazy(() => import("./pages/PetCareServices"));
 const MedicalFacilities = lazy(() => import("./pages/MedicalFacilities"));
 const Cart = lazy(() => import("./pages/Cart"));
-const Chatbot = lazy(() => import("./pages/Chatbot"));
 const Messages = lazy(() => import("./pages/Messages"));
 const Settings = lazy(() => import("./pages/Settings"));
 
@@ -79,6 +82,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/blog/:blogType" element={<BlogContent />} />
@@ -106,7 +110,6 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order-history" element={<OrderHistory />} />
             <Route path="/tracking" element={<TrackingPage />} />
-            <Route path="/chatbot" element={<Chatbot />} />
             <Route path="/messages" element={<Messages />} />
           </Route>
         </Routes>

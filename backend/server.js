@@ -1,3 +1,6 @@
+
+
+
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -6,8 +9,23 @@ const http = require('http');
 const morgan = require('morgan');
 const socketIo = require('socket.io');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
 dotenv.config();
+
+const app = express();
+app.disable("etag");
+
+// Middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
+app.use('/uploads', express.static('uploads'));
+app.use(cors({
+  origin: [process.env.FRONTEND_ORIGIN, "http://localhost:3000"],
+  credentials: true,
+}));
+app.use(bodyParser.json());
+app.use(morgan('dev'));
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
@@ -24,23 +42,12 @@ const postRoutes = require('./routes/posts');
 const chatRoutes = require('./routes/chatRoutes');
 const friendRoutes = require('./routes/friendRoutes');
 const petRoutes = require('./routes/petRoutes');
-const vendorProductRoutes = require('./routes/vendorProductRoutes'); // New vendor products routes
+const vendorProductRoutes = require('./routes/vendorProductRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const ordersRoutes = require('./routes/ordersRoutes');
-const reviewRoutes = require("./routes/reviewRoutes");
-const shippingTaxRoutes = require("./routes/shippingTaxRoutes");
-
-const app = express();
-
-app.disable("etag");
-
-
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '5mb', extended: true }));
-app.use('/uploads', express.static('uploads'));
-app.use(cors());
-app.use(bodyParser.json());
-app.use(morgan('dev'));
+const reviewRoutes = require('./routes/reviewRoutes');
+const shippingTaxRoutes = require('./routes/shippingTaxRoutes');
+const contactRoutes = require("./routes/contactRoutes");
 
 // Mount routes
 app.use('/api/auth', authRoutes);
@@ -62,17 +69,37 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/shipping-tax", shippingTaxRoutes);
+app.use("/api/contact", contactRoutes);
 
+// Static image proxy (placeholder)
+app.get('/api/placeholder/:width/:height', async (req, res) => {
+  const { width, height } = req.params;
+  const url = `https://via.placeholder.com/${width}x${height}`;
+  try {
+    const response = await axios({
+      url,
+      method: 'GET',
+      responseType: 'stream'
+    });
+    res.setHeader('Content-Type', response.headers['content-type']);
+    response.data.pipe(res);
+  } catch (err) {
+    res.sendStatus(502);
+  }
+});
 
+// Root test endpoint
 app.get('/', (req, res) => {
   res.status(200).send('Pet Website Backend is running');
 });
 
+// Error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });
 
+// HTTP & WebSocket server setup
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
@@ -95,11 +122,11 @@ io.use((socket, next) => {
   }
 });
 
+// Socket.IO events
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id, 'User:', socket.user.id);
-  
+
   socket.on('joinRoom', ({ room }) => {
-    
     socket.join(room);
   });
 
@@ -117,7 +144,6 @@ io.on('connection', (socket) => {
   socket.on('likeMessage', async (data) => {
     const chatController = require('./controllers/chatController');
     try {
-      // Pass the user's id from socket.user.id
       const updatedMessage = await chatController.likeMessageSocket(data.messageId, socket.user.id);
       io.to(data.room).emit('messageLiked', updatedMessage);
     } catch (err) {
@@ -128,7 +154,6 @@ io.on('connection', (socket) => {
   socket.on('deleteMessage', async (data) => {
     const chatController = require('./controllers/chatController');
     try {
-      // Pass the user's id to verify ownership before deletion
       const deletedMessageId = await chatController.deleteMessageSocket(data.messageId, socket.user.id);
       io.to(data.room).emit('messageDeleted', deletedMessageId);
     } catch (err) {
@@ -137,12 +162,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    
+    console.log('Client disconnected:', socket.id);
   });
 });
 
-
-
+// Start server
 const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

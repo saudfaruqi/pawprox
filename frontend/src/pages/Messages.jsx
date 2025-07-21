@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import { Send, Search, Heart, Reply, Trash2, User, Users, Bell, X, MoreHorizontal, ArrowLeft } from 'lucide-react';
+import { Send, Heart, Reply, Trash2, Users, Bell, X, ArrowLeft } from 'lucide-react';
 import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 
 // Modal component with improved styling and animations

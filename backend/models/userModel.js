@@ -10,11 +10,11 @@ const db = require('../config/db');
  * @returns {number} - The ID of the newly created user.
  */
 exports.createUser = async (userData) => {
-  const { name, email, password, role } = userData;
+  const { name, email, password, role, phone } = userData;
   try {
     const [result] = await db.query(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, password, role]
+      'INSERT INTO users (name, email, password, role, phone) VALUES (?, ?, ?, ?, ?)',
+      [name, email, password, role, phone]
     );
     return result.insertId;
   } catch (error) {

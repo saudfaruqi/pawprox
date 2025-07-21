@@ -1,19 +1,17 @@
-
-
-
-// backend/routes/authRoutes.js
-const express = require('express');
-const router = express.Router();
+const express        = require('express');
 const authController = require('../controllers/authController');
-const { protect } = require('../middlewares/authMiddleware');
+const userController = require('../controllers/userController');  // ensure path is correct
+const { protect }    = require('../middlewares/authMiddleware');
 
-// POST /api/auth/signup - Create a new user
-router.post('/signup', authController.signup);
+const router = express.Router();
 
-// POST /api/auth/login - User login
-router.post('/login', authController.login);
+router.post('/signup',          authController.signup);
+router.post('/login',           authController.login);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password',  authController.resetPassword);
+router.post('/upgrade',         protect, authController.upgradeToVendor);
 
-// POST /api/auth/upgrade - Upgrade a user to vendor (protected)
-router.post('/upgrade', protect, authController.upgradeToVendor);
+// ✅ use the renamed export here:
+router.get('/profile', protect, userController.getUserProfile);
 
 module.exports = router;

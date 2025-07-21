@@ -17,7 +17,6 @@ exports.createBooking = async (bookingData) => {
     time,
     notes,
     emergency_contact,
-    veterinarian,
     vaccination,
     status,
     booking_identifier,
@@ -26,8 +25,8 @@ exports.createBooking = async (bookingData) => {
   try {
     const [result] = await db.query(
       `INSERT INTO bookings 
-       (user_id, service_id, pet_name, pet_type, pet_weight, date, time, notes, emergency_contact, veterinarian, vaccination, status, booking_identifier, booking_date)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (user_id, service_id, pet_name, pet_type, pet_weight, date, time, notes, emergency_contact, vaccination, status, booking_identifier, booking_date)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         user_id,
         service_id,
@@ -38,7 +37,6 @@ exports.createBooking = async (bookingData) => {
         time,
         notes,
         emergency_contact,
-        veterinarian,
         vaccination,
         status,
         booking_identifier,

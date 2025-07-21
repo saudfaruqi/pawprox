@@ -1,6 +1,11 @@
+
+
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom"; 
 import axios from "axios";
+
+import pawprox from "../../images/logo.png";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -34,9 +39,10 @@ const Signup = () => {
   
   // Phone validation with international formats
   const validatePhone = (phone) => {
-    // Allow international formats, spaces, dashes, and parentheses
-    return /^(\+\d{1,3}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(phone);
+    // Valid formats: +923XXXXXXXXX, 03XXXXXXXXX, or 3XXXXXXXXX
+    return /^(\+92|0)?3\d{9}$/.test(phone);
   };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -128,18 +134,14 @@ const Signup = () => {
     delete submissionData.confirmPassword;
     
     try {
-      const response = await axios.post("http://localhost:5001/api/auth/signup", submissionData);
-      
-      localStorage.setItem("token", response.data.token);
-      
-      // Show success message
-      setTimeout(() => {
-        navigate("/login", { 
-          state: { 
-            message: "Account created successfully! Please log in." 
-          } 
-        });
-      }, 1000);
+        const { data } = await axios.post("http://localhost:5001/api/auth/signup", submissionData);
+
+        // Store token and user info
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Redirect straight to dashboard
+        navigate("/dashboard");
       
     } catch (err) {
       console.error("Signup error:", err);
@@ -172,7 +174,7 @@ const Signup = () => {
         <div className="max-w-md text-white">
           <div className="mb-12 animate-fade-in-up">
             <img
-              src="/api/placeholder/600/400"
+              src={pawprox}
               alt="Pets illustration"
               className="w-full h-auto rounded-xl shadow-xl transform transition hover:scale-105 duration-300"
             />
@@ -180,7 +182,7 @@ const Signup = () => {
           
           <div className="space-y-6 text-center">
             <Link to="/">
-              <h2 className="text-5xl font-bold text-white drop-shadow-md">Welcome to Pawprox</h2>
+              <h2 className="text-4xl font-bold text-white drop-shadow-md">Welcome to Pawprox</h2>
             </Link>
             <p className="text-xl text-white opacity-90">Connect with pet lovers and find the best care for your furry friends.</p>
             
@@ -347,7 +349,7 @@ const Signup = () => {
                   value={formData.phone_number}
                   onChange={handleChange}
                   className={getInputClassName("phone_number")}
-                  placeholder="+1 (555) 123-4567"
+                  placeholder="+92 3xxxxxxxxx"
                 />
               </div>
             </div>
@@ -449,3 +451,6 @@ const Signup = () => {
 };
 
 export default Signup;
+
+
+

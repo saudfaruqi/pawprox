@@ -164,7 +164,7 @@ const VendorDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 relative">
       <Header />
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 mt-[80px]">
         {/* Page Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Vendor Dashboard</h1>
@@ -189,7 +189,7 @@ const VendorDashboard = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Sales</p>
-              <p className="text-2xl font-bold">${salesStats.totalSales}</p>
+              <p className="text-2xl font-bold">Rs {salesStats.totalSales}</p>
             </div>
           </div>
           <div className="bg-white rounded-lg shadow p-4 flex items-center">
@@ -378,7 +378,7 @@ const VendorDashboard = () => {
                         </div>
                         <div className="flex items-center">
                           <div className="mr-4 text-right">
-                            <p className="font-bold">${parseFloat(order.total_price || 0).toFixed(2)}</p>
+                            <p className="font-bold">Rs {parseFloat(order.total_price || 0).toFixed(2)}</p>
                             <p className="text-xs text-gray-500">Qty: {order.quantity || 1}</p>
                           </div>
                           <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(order.order_status)}`}>

@@ -256,14 +256,7 @@ const PetProfileWizard = ({ onComplete, onSkip, onClose, initialData }) => {
     // Clear feedback after 3 seconds
     setTimeout(() => setFeedback({ show: false, type: '', message: '' }), 3000);
   };
-
-
-  const [modalOpen, setModalOpen] = useState(true);
   
-  const handleClose = () => {
-    setModalOpen(false);
-  };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
       <motion.div 

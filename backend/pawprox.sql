@@ -18,8 +18,11 @@ CREATE TABLE users (
   profilePic VARCHAR(255) DEFAULT '/default/path/to/profilePic.png',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  preferences TEXT NULL
+    COMMENT 'JSON‐serialized preferences',
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;
+
 
 SELECT * FROM users;
 
@@ -69,7 +72,6 @@ CREATE TABLE vendors (
 
 SELECT * FROM vendors;
 
-
 -- ================================
 -- Table: lost_pets
 -- ================================
@@ -99,31 +101,35 @@ SELECT * FROM lost_pets;
 -- ================================
 DROP TABLE IF EXISTS marketplace;
 CREATE TABLE marketplace (
-  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  user_id INT UNSIGNED NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  description TEXT NOT NULL,
-  details TEXT,
-  price DECIMAL(10,2) NOT NULL,
-  category VARCHAR(100) NOT NULL,
-  stock INT NOT NULL DEFAULT 0,
-  image VARCHAR(255) DEFAULT 'https/image.com',
-  detail_images TEXT,
-  sku VARCHAR(100) DEFAULT 'N/A',
-  dimensions VARCHAR(100) DEFAULT 'N/A',
-  weight VARCHAR(100) DEFAULT 'N/A',
-  materials VARCHAR(255) DEFAULT 'N/A',
-  rating INT DEFAULT 0,
-  tax DECIMAL(10,2) NOT NULL DEFAULT 0,
-  shipping_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
-  features TEXT,           -- New column for features
-  benefits TEXT,           -- New column for benefits
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  id             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  vendor_id      INT UNSIGNED NOT NULL,          -- <— newly added
+  user_id        INT UNSIGNED NOT NULL,
+  title          VARCHAR(255) NOT NULL,
+  description    TEXT NOT NULL,
+  details        TEXT,
+  price          DECIMAL(10,2) NOT NULL,
+  category       VARCHAR(100) NOT NULL,
+  stock          INT NOT NULL DEFAULT 0,
+  image          VARCHAR(255) DEFAULT 'https://via.placeholder.com/150',
+  detail_images  TEXT,
+  sku            VARCHAR(100) DEFAULT 'N/A',
+  dimensions     VARCHAR(100) DEFAULT 'N/A',
+  weight         VARCHAR(100) DEFAULT 'N/A',
+  materials      VARCHAR(255) DEFAULT 'N/A',
+  tax            DECIMAL(10,2) NOT NULL DEFAULT 0,
+  shipping_cost  DECIMAL(10,2) NOT NULL DEFAULT 0,
+  features       TEXT,
+  benefits       TEXT,
+  rating         INT DEFAULT 0,
+  created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                   ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  CONSTRAINT fk_marketplace_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_marketplace_vendor FOREIGN KEY (vendor_id)
+    REFERENCES vendors(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_marketplace_user   FOREIGN KEY (user_id)
+    REFERENCES users(id)   ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
-
 
 
 SELECT * FROM marketplace;
@@ -133,16 +139,20 @@ CREATE TABLE product_reviews (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   product_id INT UNSIGNED NOT NULL,
   user_id INT UNSIGNED NOT NULL,
-  rating INT NOT NULL,         -- Rating from 1 to 5
-  comment TEXT,                -- The review text
+  rating INT NOT NULL,
+  comment TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
   PRIMARY KEY (id),
   CONSTRAINT fk_product_review_product 
-    FOREIGN KEY (product_id) REFERENCES marketplace(id) ON DELETE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES marketplace(id) ON DELETE CASCADE,
   CONSTRAINT fk_product_review_user 
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+DESCRIBE product_reviews;
+
 
 SELECT * FROM product_reviews;
 
@@ -200,33 +210,35 @@ CREATE TABLE petcare_services (
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
+drop table petcare_services;
+
 INSERT INTO petcare_services (name, description, price, availability, features)
 VALUES
   (
     'Pet Sitting',
     'Professional in-home pet sitting services for your pet, including feeding, walking, and medication administration.',
-    '$30/hour',
+    'Rs 500/hour',
     'Available 24/7',
     '["Feeding", "Walking", "Medication administration", "Daily updates"]'
   ),
   (
     'Dog Walking',
     'Reliable dog walking service to provide exercise and socialization for your dog.',
-    '$25/hour',
+    'Rs 2000/hour',
     'Mon-Sun, 6am-8pm',
     '["Group walks", "Individual walks", "Park visits", "Exercise routines"]'
   ),
   (
     'Pet Grooming',
     'Comprehensive grooming services including bathing, nail trimming, and fur styling for all types of pets.',
-    'From $45',
+    'From Rs 3000',
     'Mon-Sat, 9am-5pm',
     '["Bathing", "Nail trimming", "Ear cleaning", "Style trimming"]'
   ),
   (
     'Veterinary Services',
     'Basic health check-ups, vaccinations, deworming, and minor treatments provided by licensed veterinarians.',
-    'From $75',
+    'From Rs 3500',
     'Mon-Fri, 9am-6pm',
     '["Health checks", "Vaccinations", "Deworming", "Minor treatments"]'
   );

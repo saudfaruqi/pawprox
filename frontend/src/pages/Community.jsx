@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Heart,
-  Share2,
   Send,
   ThumbsUp,
   Laugh,

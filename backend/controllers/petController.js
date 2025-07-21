@@ -32,6 +32,13 @@ exports.createPetProfile = async (req, res) => {
     photo = req.file.path;
   }
 
+ const vac = Array.isArray(vaccinations)
+                ? JSON.stringify(vaccinations)
+                : vaccinations;
+  const all = Array.isArray(allergies)
+                ? JSON.stringify(allergies)
+                : allergies;
+
   try {
     const petId = await petModel.createPet({
       user_id,
@@ -43,16 +50,16 @@ exports.createPetProfile = async (req, res) => {
       weight,
       color,
       health_status,
-      vaccinations, // if this is an array, consider converting to JSON: JSON.stringify(vaccinations)
-      allergies,
+      vaccinations: vac,    // now a string
+      allergies:    all,    // now a string
       lost_status,
       microchipped,
       photo
     });
-    return res.status(201).json({ message: 'Pet profile created successfully', petId });
+    return res.status(201).json({ message: 'Pet profile created', petId });
   } catch (error) {
-    console.error('Create pet profile error:', error);
-    return res.status(500).json({ error: 'Server error while creating pet profile' });
+    console.error(error);
+    return res.status(500).json({ error: 'Server error' });
   }
 };
 

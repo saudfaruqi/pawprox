@@ -4,10 +4,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import {
   ShoppingBag,
-  Clock,
   AlertCircle,
   Search,
-  Filter,
   ChevronDown,
   ChevronUp,
   Download,
@@ -15,9 +13,7 @@ import {
   Truck,
   X,
   Calendar,
-  DollarSign,
   Package,
-  FileText,
   ArrowLeft,
   ArrowRight,
   Sliders,
@@ -563,8 +559,7 @@ const OrderHistory = () => {
                             {order.items?.length || 0} item{order.items?.length !== 1 ? "s" : ""}
                           </div>
                           <div className="flex items-center">
-                            <DollarSign size={15} className="mr-1 text-gray-400" />
-                            ${Number(order.total_price).toFixed(2)}
+                            Rs {Number(order.total_price).toFixed(2)}
                           </div>
                         </div>
                       </div>
@@ -635,10 +630,10 @@ const OrderHistory = () => {
                                     {item.quantity}
                                   </td>
                                   <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                                    ${Number(item.price).toFixed(2)}
+                                    Rs {Number(item.price).toFixed(2)}
                                   </td>
                                   <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                                    ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
+                                    Rs {(Number(item.price) * Number(item.quantity)).toFixed(2)}
                                   </td>
                                 </tr>
                               ))}
@@ -652,7 +647,7 @@ const OrderHistory = () => {
                                   Subtotal
                                 </td>
                                 <td className="px-4 py-3 text-right text-sm font-medium text-gray-900">
-                                  ${Number(order.total_price - (order.shipping_cost || 0)).toFixed(2)}
+                                  Rs {Number(order.total_price - (order.shipping_cost || 0)).toFixed(2)}
                                 </td>
                               </tr>
                               {order.shipping_cost && (
@@ -664,7 +659,7 @@ const OrderHistory = () => {
                                     Shipping
                                   </td>
                                   <td className="px-4 py-2 text-right text-sm font-medium text-gray-900">
-                                    ${Number(order.shipping_cost).toFixed(2)}
+                                    Rs {Number(order.shipping_cost).toFixed(2)}
                                   </td>
                                 </tr>
                               )}
@@ -676,7 +671,7 @@ const OrderHistory = () => {
                                   Total
                                 </td>
                                 <td className="px-4 py-3 text-right text-sm font-bold text-gray-900">
-                                  ${Number(order.total_price).toFixed(2)}
+                                  Rs {Number(order.total_price).toFixed(2)}
                                 </td>
                               </tr>
                             </tfoot>

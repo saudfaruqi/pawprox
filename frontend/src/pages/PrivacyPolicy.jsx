@@ -132,9 +132,9 @@ const PrivacyPolicy = () => {
             <section>
               <h2 className="text-xl font-semibold mb-3 text-gray-900">10. Contact Information</h2>
               <p>If you have any questions, concerns, or requests regarding your privacy or our practices, please contact us:</p>
-              <p>Email: privacy@pawprox.pk</p>
-              <p>Phone: [Your Pakistan Phone Number]</p>
-              <p>Address: [Your Pakistan Office Address]</p>
+              <p>Email: pawprox2025@gmail.com</p>
+              <p>Phone: +92 3408355962</p>
+              <p>Address: DHA Phase 7, Karachi, Pakistan</p>
             </section>
           </div>
         </div>

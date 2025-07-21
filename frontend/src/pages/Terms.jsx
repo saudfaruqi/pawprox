@@ -127,9 +127,9 @@ const Terms = () => {
               <section>
                 <h2 className="text-xl font-semibold mb-3 text-gray-900">9. Contact Information</h2>
                 <p>If you have any questions or concerns about these Terms and Conditions, please contact us at:</p>
-                <p>Email: legal@pawprox.pk</p>
-                <p>Address: [Your Pakistan Office Address]</p>
-                <p>Phone: +92-XXXXX-XXXXX</p>
+                <p>Email: pawprox2025@gmail.com</p>
+                <p>Phone: +92 3408355962</p>
+                <p>Address: DHA Phase 7, Karachi, Pakistan</p>
                 <p>Our team is available to assist you with any inquiries regarding these Terms.</p>
               </section>
             </div>

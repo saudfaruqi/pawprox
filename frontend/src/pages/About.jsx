@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   Heart, 
@@ -54,27 +55,27 @@ const About = () => {
   const team = [
     {
       name: "Mr. Saud Ahmed Faruqi",
-      role: "Founder & CTO",
-      image: "/api/placeholder/300/300",
-      description: "Veterinarian with 15 years of experience"
+      role: "Full Stack Developer",
+      image: "",
+      description: "With 3 years of experience"
     },
     {
       name: "Mr Wali Hussain",
-      role: "Head of Operations",
-      image: "/api/placeholder/300/300",
-      description: "Former tech executive & pet welfare advocate"
+      role: "Chatbot/Documentation",
+      image: "",
+      description: "With 2 years of experience"
     },
     {
       name: "Ms Laiba",
-      role: "Chief Veterinary Officer",
-      image: "/api/placeholder/300/300",
+      role: "Documentation",
+      image: "",
       description: "Specialist in emergency pet care"
     },
     {
         name: "Mr Muneeb ur Rehman",
-        role: "Chief Executive Officer",
-        image: "/api/placeholder/300/300",
-        description: "Specialist in emergency pet care"
+        role: "Recommendation System",
+        image: "",
+        description: "With 2 years of experience"
       }
   ];
 
@@ -111,12 +112,16 @@ const About = () => {
               building communities, and ensuring every pet gets the care they deserve.
             </p>
             <div className="flex space-x-4">
+              <Link to="/login">
               <button className="bg-white text-[#2E6166] px-4 py-1 lg:px-8 lg:py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                 Join Our Community
               </button>
+              </Link>
+              <Link to="/contact">
               <button className="border-2 border-white px-4 py-1 lg:px-8 lg:py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors">
                 Learn More
               </button>
+              </Link>
             </div>
           </motion.div>
         </div>
@@ -249,7 +254,7 @@ const About = () => {
               >
                 <Phone className="w-8 h-8 text-[#2E6166] mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Call Us</h3>
-                <p className="text-gray-600">1-800-PAW-PROX</p>
+                <p className="text-gray-600">+92 3408355962</p>
                 <p className="text-gray-600">Mon-Sun 24/7</p>
               </motion.div>
               
@@ -261,7 +266,7 @@ const About = () => {
               >
                 <Mail className="w-8 h-8 text-[#2E6166] mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Email Us</h3>
-                <p className="text-gray-600">support@pawprox.com</p>
+                <p className="text-gray-600">pawprox2025@gmail.com</p>
                 <p className="text-gray-600">Response within 24hrs</p>
               </motion.div>
               
@@ -273,8 +278,8 @@ const About = () => {
               >
                 <MapPin className="w-8 h-8 text-[#2E6166] mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Visit Us</h3>
-                <p className="text-gray-600">123 Pet Street</p>
-                <p className="text-gray-600">San Francisco, CA 94105</p>
+                <p className="text-gray-600">DHA Phase 7</p>
+                <p className="text-gray-600">Karachi, Pakistan</p>
               </motion.div>
             </div>
           </div>
@@ -292,9 +297,11 @@ const About = () => {
             <p className="text-l lg:text-xl mb-8 max-w-2xl mx-auto">
               Start your journey with PawProx today and give your pet the care they deserve.
             </p>
+            <Link to="/login">
             <button className="bg-white text-[#2E6166] lg:px-8 lg:py-3 px-4 py-1 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
               Get Started Now
             </button>
+            </Link>
           </motion.div>
         </div>
       </section>

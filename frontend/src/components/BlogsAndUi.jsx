@@ -3,9 +3,9 @@ import { UserCircle2, Store, Stethoscope, ChevronLeft, ChevronRight, Clock, User
 import { Link } from 'react-router-dom';
 import { useSwipeable } from 'react-swipeable';
 
-import blog1 from '../images/blog1.jpeg';
-import blog2 from '../images/blog2.jpeg';
-import blog3 from '../images/blog3.jpeg';
+import blog1 from '../images/blog1.png';
+import blog2 from '../images/blog2.jpg';
+import blog3 from '../images/blog3.webp';
 
 const Card = ({ children, className = '' }) => (
     <div className={`bg-white rounded-xl shadow-lg transition-all duration-300 ${className}`}>
@@ -249,14 +249,14 @@ const PlatformSections = () => {
                     {/* Navigation buttons */}
                     <button
                         onClick={handlePrevious}
-                        className="absolute top-1/3 left-2 transform -translate-y-1/2 bg-white/80 hover:bg-white backdrop-blur-sm p-2 rounded-full shadow-lg text-gray-800 hover:text-blue-600 transition-colors z-10"
+                        className="absolute top-2/3 -left-2 transform -translate-y-1/2 bg-white/80 hover:bg-white backdrop-blur-sm p-2 rounded-full shadow-lg text-gray-800 hover:text-blue-600 transition-colors z-10"
                         aria-label="Previous slide"
                     >
                         <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button
                         onClick={handleNext}
-                        className="absolute top-1/3 right-2 transform -translate-y-1/2 bg-white/80 hover:bg-white backdrop-blur-sm p-2 rounded-full shadow-lg text-gray-800 hover:text-blue-600 transition-colors z-10"
+                        className="absolute top-2/3 -right-2 transform -translate-y-1/2 bg-white/80 hover:bg-white backdrop-blur-sm p-2 rounded-full shadow-lg text-gray-800 hover:text-blue-600 transition-colors z-10"
                         aria-label="Next slide"
                     >
                         <ChevronRight className="w-5 h-5" />
@@ -275,7 +275,7 @@ const PlatformSections = () => {
                                     <img
                                         src={item.image}
                                         alt={item.title}
-                                        className="w-full h-64 object-cover rounded-t-xl transform transition-transform duration-700 group-hover:scale-105"
+                                        className="w-full min-h-64 object-cover rounded-t-xl transform transition-transform duration-700 group-hover:scale-105"
                                         loading="lazy"
                                     />
                                     <div className="absolute top-4 left-4">

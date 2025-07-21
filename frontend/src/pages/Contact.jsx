@@ -2,6 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Send, Phone, Mail, MapPin, Clock, Facebook, Twitter, Linkedin, Instagram, Upload, CheckCircle, XCircle } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import axios from "axios";
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+
+// fix default marker icon paths (optional but recommended)
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl:       require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl:     require('leaflet/dist/images/marker-shadow.png'),
+});
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +23,8 @@ const Contact = () => {
     message: '',
     file: null
   });
+
+  const officePosition = [24.814598610454212, 67.07980603961614]; 
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,32 +86,63 @@ const Contact = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    // Validate all fields
-    const newErrors = {};
-    Object.keys(formData).forEach(key => {
-      if (key !== 'file') {
-        const error = validateField(key, formData[key]);
-        if (error) newErrors[key] = error;
-      }
-    });
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+  // 1) Validate all fields (except file)
+  const newErrors = {};
+  Object.keys(formData).forEach(key => {
+    if (key !== 'file') {
+      const error = validateField(key, formData[key]);
+      if (error) newErrors[key] = error;
     }
+  });
 
-    setIsSubmitting(true);
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitted(true);
-      setFormData({ name: '', email: '', department: '', subject: '', message: '', file: null });
-      setFileName('');
-    }, 1500);
-  };
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
+
+  // 2) Build FormData payload
+  const payload = new FormData();
+  payload.append("name",       formData.name);
+  payload.append("email",      formData.email);
+  payload.append("department", formData.department);
+  payload.append("subject",    formData.subject);
+  payload.append("message",    formData.message);
+  if (formData.file) {
+    payload.append("file", formData.file);
+  }
+
+  // 3) Submit
+  setIsSubmitting(true);
+  setErrors({});  // clear any form‑level error
+
+  try {
+    await axios.post(
+      "http://localhost:5001/api/contact",
+      payload,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    // 4) On success
+    setSubmitted(true);
+    setFormData({
+      name: "",
+      email: "",
+      department: "",
+      subject: "",
+      message: "",
+      file: null
+    });
+    setFileName("");
+  } catch (err) {
+    console.error("Contact submit failed:", err);
+    setErrors({ form: "Failed to send your message. Please try again later." });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div>
@@ -118,7 +162,7 @@ const Contact = () => {
                 <Phone className="w-6 h-6 text-blue-600 mt-1" />
                 <div className="ml-4">
                   <p className="font-medium text-gray-900">Phone</p>
-                  <p className="text-gray-600">+1 (555) 123-4567</p>
+                  <p className="text-gray-600">+92 3408355962</p>
                 </div>
               </div>
 
@@ -126,7 +170,7 @@ const Contact = () => {
                 <Mail className="w-6 h-6 text-blue-600 mt-1" />
                 <div className="ml-4">
                   <p className="font-medium text-gray-900">Email</p>
-                  <p className="text-gray-600">contact@company.com</p>
+                  <p className="text-gray-600">pawprox2025@gmail.com</p>
                 </div>
               </div>
 
@@ -134,7 +178,7 @@ const Contact = () => {
                 <MapPin className="w-6 h-6 text-blue-600 mt-1" />
                 <div className="ml-4">
                   <p className="font-medium text-gray-900">Address</p>
-                  <p className="text-gray-600">123 Business Street<br />Suite 100<br />City, State 12345</p>
+                  <p className="text-gray-600">DHA Phase 7<br/> Karachi, Pakistan</p>
                 </div>
               </div>
 
@@ -151,18 +195,24 @@ const Contact = () => {
           {/* Map Integration */}
           <div className="bg-white rounded-xl shadow-lg p-3 hover:shadow-xl transition-shadow">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">Location</h2>
-            <div className="relative w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
-              <img 
-                src="/api/placeholder/600/400" 
-                alt="Map location" 
-                className="w-full h-full object-cover"
+            <MapContainer
+              center={officePosition}
+              zoom={15}
+              scrollWheelZoom={false}
+              className="w-full h-64 rounded-lg overflow-hidden"
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <div className="absolute bottom-4 left-4 bg-white px-4 py-2 rounded-lg shadow-md">
-                <p className="text-sm font-medium text-gray-900">Our Office</p>
-                <p className="text-xs text-gray-600">123 Business Street</p>
-              </div>
-            </div>
+              <Marker position={officePosition}>
+                <Popup>
+                  Our Office<br />123 Business Street, DHA Phase 7.
+                </Popup>
+              </Marker>
+            </MapContainer>
           </div>
+
         </div>
 
         {/* Contact Form */}

@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from "react-router-dom";
 import { motion } from 'framer-motion';
 import { ShoppingBag, AlertTriangle, ArrowRight, Heart, MapPin, Users } from 'lucide-react';
+import ThreeJSBackground from './ThreeJSBackground'; // Import the new component
 
-const HeroSection = ({ containerRef }) => {
+const HeroSection = () => {
+  // Create ref for the Three.js container
+  const containerRef = useRef(null);
+  
   // Animation variants for staggered animations
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -37,6 +41,9 @@ const HeroSection = ({ containerRef }) => {
     <section className="relative overflow-hidden pt-[0px] sm:pt-[0px] h-auto lg:min-h-[90vh] flex items-center">
       {/* 3D Background */}
       <div ref={containerRef} className="absolute inset-0 overflow-hidden" />
+      
+      {/* Three.js Background */}
+      <ThreeJSBackground containerRef={containerRef} />
       
       {/* Improved gradient overlay */}
       <div 

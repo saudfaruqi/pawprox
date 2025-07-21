@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom'
-import { Calendar, Clock, MapPin, Phone, Mail, Check, Search, Filter, X, AlertCircle, Info, Award } from 'lucide-react';
+import { Calendar, Clock, MapPin, Phone, Mail, Check, Search, X, AlertCircle, Info, Award } from 'lucide-react';
 import axios from "axios";
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const PetCareServices = () => {
+  const bookingFormRef = useRef(null);
   const [selectedService, setSelectedService] = useState(null);
   const [bookingStatus, setBookingStatus] = useState('');
-  const [bookingHistory, setBookingHistory] = useState([]);
+  const [bookingHistory, setBookingHistory] = useState(() => {
+  const saved = localStorage.getItem("petcare_bookingHistory");
+  return saved ? JSON.parse(saved) : [];
+});
+
   const [showHistory, setShowHistory] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [services, setServices] = useState([]);
@@ -16,6 +21,7 @@ const PetCareServices = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [error, setError] = useState('');
   const [isMobileView, setIsMobileView] = useState(false);
+
   const [formData, setFormData] = useState({
     petName: '',
     petType: '',
@@ -24,9 +30,83 @@ const PetCareServices = () => {
     notes: '',
     petWeight: '',
     emergencyContact: '',
-    veterinarian: '',
     vaccination: 'unknown'
   });
+
+  useEffect(() => {
+  localStorage.setItem(
+    "petcare_bookingHistory",
+    JSON.stringify(bookingHistory)
+  );
+}, [bookingHistory]);
+
+
+  const [petProfile, setPetProfile]     = useState(null);
+  const [userProfile, setUserProfile]   = useState(null);
+
+  // 1️⃣ Load pet profile (as you already have)
+  useEffect(() => {
+    const loadPetProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const { data } = await axios.get(
+          "http://localhost:5001/api/pets",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const pets = data.pets || data;
+        if (pets.length) setPetProfile(pets[0]);
+      } catch (err) {
+        if (err.response?.status !== 401) console.error(err);
+      }
+    };
+    loadPetProfile();
+  }, []);
+
+  // 2️⃣ Seed formData when petProfile arrives
+  useEffect(() => {
+    if (!petProfile) return;
+    setFormData(fd => ({
+      ...fd,
+      petName:     petProfile.name
+                      ? petProfile.name 
+                      : fd.petName,
+      petType:     petProfile.type,
+      petWeight:   petProfile.weight,
+      vaccination: petProfile.vaccinations?.length 
+                      ? "up-to-date" 
+                      : fd.vaccination
+    }));
+  }, [petProfile]);
+
+  // 3️⃣ Load user profile (for emergencyContact)
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const { data } = await axios.get(
+          "http://localhost:5001/api/users/profile",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        // assuming your endpoint returns { user: { phone, email, ... } }
+        setUserProfile(data.user);
+      } catch (err) {
+        if (err.response?.status !== 401) console.error(err);
+      }
+    };
+    loadUserProfile();
+  }, []);
+
+  // 4️⃣ Seed formData when userProfile arrives
+  useEffect(() => {
+    if (!userProfile) return;
+    setFormData(fd => ({
+      ...fd,
+      emergencyContact: userProfile.phone || fd.emergencyContact
+    }));
+  }, [userProfile]);
+
 
   // Check for mobile view
   useEffect(() => {
@@ -97,22 +177,45 @@ const PetCareServices = () => {
   };
   
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!selectedService) return;
-    
-    const bookingData = {
-      ...formData,
-      service: selectedService.name,
-      bookingId: Math.random().toString(36).substr(2, 9),
-      status: 'Confirmed',
-      bookingDate: new Date().toLocaleString()
-    };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!selectedService) return;
 
-    setBookingHistory([bookingData, ...bookingHistory]);
+  const payload = {
+    service_id:      selectedService.id,
+    pet_name:        formData.petName,
+    pet_type:        formData.petType,
+    pet_weight:      formData.petWeight,
+    date:            formData.date,
+    time:            formData.time,
+    notes:           formData.notes,
+    emergency_contact: formData.emergencyContact,
+    vaccination:     formData.vaccination,
+  };
+
+  try {
+    // 1️⃣ Send to backend (this will trigger your createBooking email)
+    const { data } = await axios.post(
+      "http://localhost:5001/api/bookings",
+      payload,
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+
+    // 2️⃣ Grab the bookingId from response
+    const bookingIdentifier = data.bookingId;
+
+    // 3️⃣ Now update local history
+    const newBooking = {
+      ...formData,
+      service:       selectedService.name,
+      bookingId:     bookingIdentifier,
+      status:        'Confirmed',
+      bookingDate:   new Date().toLocaleString(),
+    };
+    setBookingHistory([newBooking, ...bookingHistory]);
     setBookingStatus('confirmed');
 
-    // Reset form
+    // 4️⃣ Reset form & scroll
     setFormData({
       petName: '',
       petType: '',
@@ -121,15 +224,86 @@ const PetCareServices = () => {
       notes: '',
       petWeight: '',
       emergencyContact: '',
-      veterinarian: '',
       vaccination: 'unknown'
     });
-    
-    // Scroll to confirmation message
     setTimeout(() => {
-      document.getElementById('confirmation-message').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('confirmation-message')
+        .scrollIntoView({ behavior: 'smooth' });
     }, 100);
-  };
+
+  } catch (err) {
+    console.error("Booking API error:", err);
+    setError("Sorry, we couldn't complete your booking. Please try again.");
+  }
+};
+
+
+
+
+// Cancel: simply mark the booking as cancelled
+const handleCancel = async (bookingId) => {
+  try {
+    // call your cancel endpoint
+    await axios.delete(
+      `http://localhost:5001/api/bookings/${bookingId}`,
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+    // if HTTP 200, update local list
+    setBookingHistory(prev =>
+      prev.map(b =>
+        b.bookingId === bookingId
+          ? { ...b, status: 'Cancelled' }
+          : b
+      )
+    );
+  } catch (err) {
+    console.error("Cancel API error:", err);
+    setError("Sorry, we couldn't cancel your booking. Please try again.");
+  }
+};
+
+// Reschedule: open the booking form with this booking’s data
+const handleReschedule = async (bookingId) => {
+  const booking = bookingHistory.find(b => b.bookingId === bookingId);
+  if (!booking) return;
+
+  // pre-fill the form
+  setSelectedService(services.find(s => s.name === booking.service));
+  setFormData({
+    petName: booking.petName,
+    petType: booking.petType,
+    petWeight: booking.petWeight,
+    vaccination: booking.vaccination,
+    date: booking.date,
+    time: booking.time,
+    emergencyContact: booking.emergencyContact,
+    notes: booking.notes,
+  });
+
+  try {
+    // call your update endpoint
+    await axios.put(
+      `http://localhost:5001/api/bookings/${bookingId}`,
+      { date: booking.date, time: booking.time, status: 'Confirmed' },
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+    // update local history
+    setBookingHistory(prev =>
+      prev.map(b =>
+        b.bookingId === bookingId
+          ? { ...b, date: booking.date, time: booking.time, status: 'Confirmed' }
+          : b
+      )
+    );
+    // scroll to the form
+    bookingFormRef.current?.scrollIntoView({ behavior: 'smooth' });
+  } catch (err) {
+    console.error("Reschedule API error:", err);
+    setError("Sorry, we couldn't reschedule your booking. Please try again.");
+  }
+};
+
+
 
   const getServiceIcon = (category) => {
     switch(category) {
@@ -154,7 +328,6 @@ const PetCareServices = () => {
     return ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
   };
 
-  const bookingFormRef = useRef(null);
 
   useEffect(() => {
     if (selectedService && bookingFormRef.current) {
@@ -166,7 +339,7 @@ const PetCareServices = () => {
     <div className="bg-gray-50 min-h-screen">
       <Header />
 
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 mt-[100px]">
+      <div className="max-w-8xl mx-auto p-4 sm:p-6 lg:p-6 mt-[100px]">
         {/* Hero Section */}
         <div className="bg-[#2E6166] rounded-2xl p-6 sm:p-10 mb-8 text-white shadow-xl">
           <div className="max-w-3xl">
@@ -293,7 +466,7 @@ const PetCareServices = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {filteredServices.map((service) => (
                 <div 
                   key={service.id}
@@ -362,9 +535,14 @@ const PetCareServices = () => {
 
         {/* Booking Form */}
         {selectedService && (
-        <div ref={bookingFormRef} id="booking-form" className="bg-white p-6 sm:p-8 rounded-xl shadow-lg mb-8">
+          <div
+            key={petProfile ? petProfile.id : "no-profile"}
+            ref={bookingFormRef}
+            id="booking-form"
+            className="bg-white p-6 sm:p-8 rounded-xl shadow-lg mb-8"
+          >
             <h2 className="text-2xl font-bold mb-6">Book {selectedService.name}</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form id="booking-form" ref={bookingFormRef} onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -384,21 +562,18 @@ const PetCareServices = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Pet Type*
                   </label>
-                  <select
-                    name="petType"
-                    value={formData.petType}
-                    onChange={handleInputChange}
+                  <select name="petType" value={formData.petType} onChange={handleInputChange}
                     className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     required
                   >
                     <option value="">Select pet type</option>
-                    <option value="dog">Dog</option>
-                    <option value="cat">Cat</option>
-                    <option value="bird">Bird</option>
-                    <option value="rabbit">Rabbit</option>
-                    <option value="reptile">Reptile</option>
-                    <option value="fish">Fish</option>
-                    <option value="other">Other</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Bird">Bird</option>
+                    <option value="Rabbit">Rabbit</option>
+                    <option value="Reptile">Reptile</option>
+                    <option value="Fish">Fish</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
                 
@@ -472,35 +647,26 @@ const PetCareServices = () => {
                     </div>
                   )}
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Emergency Contact*
-                  </label>
-                  <input
-                    type="tel"
-                    name="emergencyContact"
-                    value={formData.emergencyContact}
-                    onChange={handleInputChange}
-                    placeholder="(123) 456-7890"
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Veterinarian Contact
-                  </label>
-                  <input
-                    type="tel"
-                    name="veterinarian"
-                    value={formData.veterinarian}
-                    onChange={handleInputChange}
-                    placeholder="(123) 456-7890"
-                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                  />
-                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Emergency Contact*
+                </label>
+                <input
+                  type="text"
+                  name="emergencyContact"
+                  value={formData.emergencyContact}
+                  onChange={e =>
+                    setFormData(fd => ({
+                      ...fd,
+                      emergencyContact: e.target.value
+                    }))
+                  }
+                  placeholder="92 3456789026"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  required
+                />
               </div>
               
               <div>
@@ -556,16 +722,10 @@ const PetCareServices = () => {
                 </p>
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-green-700">
                   <div>
-                    <span className="font-medium">Pet:</span> {formData.petName}
+                    <span className="font-medium" value={formData.petName}>Pet:</span> {formData.petName}
                   </div>
                   <div>
                     <span className="font-medium">Service:</span> {selectedService.name}
-                  </div>
-                  <div>
-                    <span className="font-medium">Date:</span> {formData.date}
-                  </div>
-                  <div>
-                    <span className="font-medium">Time:</span> {formData.time}
                   </div>
                 </div>
                 <div className="mt-4">
@@ -671,10 +831,17 @@ const PetCareServices = () => {
                       </div>
                       
                       <div className="flex flex-wrap gap-2">
-                        <button className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm font-medium">
+                        <button
+                          onClick={() => handleReschedule(booking.bookingId)}
+                          className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm font-medium"
+                        >
                           Reschedule
                         </button>
-                        <button className="px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm font-medium">
+
+                        <button
+                          onClick={() => handleCancel(booking.bookingId)}
+                          className="px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm font-medium"
+                        >
                           Cancel
                         </button>
                       </div>
@@ -730,7 +897,7 @@ const PetCareServices = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Call us</p>
-                  <a href="tel:(555)123-4567" className="text-lg font-medium hover:text-blue-600 transition-colors">(555) 123-4567</a>
+                  <a href="tel:(555)123-4567" className="text-lg font-medium hover:text-blue-600 transition-colors">+92 3408355962</a>
                 </div>
               </div>
               
@@ -740,7 +907,7 @@ const PetCareServices = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Email us</p>
-                  <a href="mailto:support@petcare.com" className="text-lg font-medium hover:text-blue-600 transition-colors">support@petcare.com</a>
+                  <a href="mailto:pawprox2025@gmail.com" className="text-lg font-medium hover:text-blue-600 transition-colors">pawprox2025@gmail.com</a>
                 </div>
               </div>
               
@@ -750,7 +917,7 @@ const PetCareServices = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Find us</p>
-                  <p className="text-lg font-medium">123 Pet Lane, Pawville, CA 94123</p>
+                  <p className="text-lg font-medium">DHA Phase 7, Karachi, Pakistan</p>
                 </div>
               </div>
             </div>

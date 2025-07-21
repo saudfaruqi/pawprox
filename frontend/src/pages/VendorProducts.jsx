@@ -305,7 +305,7 @@ const VendorProducts = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Avg. Price</p>
-              <p className="text-2xl font-bold">${stats.averagePrice}</p>
+              <p className="text-2xl font-bold">Rs {stats.averagePrice}</p>
             </div>
           </div>
         </div>
@@ -349,7 +349,7 @@ const VendorProducts = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Price (Rs )</label>
                     <input
                       type="number"
                       name="price"
@@ -377,7 +377,7 @@ const VendorProducts = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Shipping Cost ($)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Shipping Cost (Rs )</label>
                     <input
                       type="number"
                       name="shippingCost"
@@ -679,7 +679,7 @@ const VendorProducts = () => {
                 <div className="p-4 flex-grow">
                   <div className="flex justify-between items-start">
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">{product.title}</h3>
-                    <span className="text-lg font-bold text-blue-600">${parseFloat(product.price).toFixed(2)}</span>
+                    <span className="text-lg font-bold text-blue-600">Rs {parseFloat(product.price).toFixed(2)}</span>
                   </div>
                   <div className="mb-3 flex items-center">
                     <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
@@ -714,7 +714,7 @@ const VendorProducts = () => {
                             <li><strong>Weight:</strong> {product.weight}</li>
                             <li><strong>Materials:</strong> {product.materials}</li>
                             {product.tax && <li><strong>Tax:</strong> {product.tax}%</li>}
-                            {product.shipping_cost && <li><strong>Shipping:</strong> ${product.shipping_cost}</li>}
+                            {product.shipping_cost && <li><strong>Shipping:</strong> Rs {product.shipping_cost}</li>}
                             {product.features && <li><strong>Features:</strong> {product.features}</li>}
                             {product.benefits && <li><strong>Benefits:</strong> {product.benefits}</li>}
                           </ul>

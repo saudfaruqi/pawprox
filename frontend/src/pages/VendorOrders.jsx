@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { 
   Loader2, ChevronRight, Search, Package, Filter, AlertCircle, Calendar, 
-  User, Mail, MapPin, Phone, ArrowDown, ArrowUp, ShoppingCart, Check, X, Truck, Clock 
+  User, MapPin, Phone, ArrowDown, ArrowUp, ShoppingCart, Check, X, Truck, Clock 
 } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -307,7 +307,7 @@ const VendorOrders = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Revenue</p>
-              <p className="text-2xl font-bold">${stats.totalRevenue}</p>
+              <p className="text-2xl font-bold">Rs {stats.totalRevenue}</p>
             </div>
           </div>
         </div>
@@ -463,7 +463,7 @@ const VendorOrders = () => {
                           {formatDate(order.created_at)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          ${parseFloat(order.total_price).toFixed(2)}
+                          Rs {parseFloat(order.total_price).toFixed(2)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           {updateStatus.loading && updateStatus.id === order.id ? (
@@ -590,7 +590,7 @@ const VendorOrders = () => {
                                         {item.name} (x{item.quantity})
                                       </span>
                                       <span className="text-sm text-gray-600">
-                                        ${parseFloat(item.price).toFixed(2)}
+                                        Rs {parseFloat(item.price).toFixed(2)}
                                       </span>
                                     </li>
                                   ))}

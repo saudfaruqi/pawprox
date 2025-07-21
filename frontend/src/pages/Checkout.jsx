@@ -560,7 +560,7 @@ useEffect(() => {
                         Processing...
                       </span>
                     ) : (
-                      `Pay $${finalTotal.toFixed(2)}`
+                      `Pay Rs ${finalTotal.toFixed(2)}`
                     )}
                   </button>
                 </div>
@@ -591,7 +591,7 @@ useEffect(() => {
                       <div className="truncate max-w-[120px]">
                         <h3 className="text-gray-800 font-medium text-sm truncate">{item.title}</h3>
                         <p className="text-gray-500 text-xs">
-                          ${parseFloat(item.price).toFixed(2)}
+                          Rs {parseFloat(item.price).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -602,19 +602,19 @@ useEffect(() => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-700">Subtotal</span>
-                <span className="text-gray-700">${totalPrice.toFixed(2)}</span>
+                <span className="text-gray-700">Rs {totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-700">Shipping</span>
-                <span className="text-gray-700">${shippingCost.toFixed(2)}</span>
+                <span className="text-gray-700">Rs {shippingCost.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-700">Tax</span>
-                <span className="text-gray-700">${tax.toFixed(2)}</span>
+                <span className="text-gray-700">Rs {tax.toFixed(2)}</span>
               </div>
               <div className="border-t pt-4 flex justify-between font-semibold">
                 <span className="text-gray-800">Total</span>
-                <span className="text-gray-800">${finalTotal.toFixed(2)}</span>
+                <span className="text-gray-800">Rs {finalTotal.toFixed(2)}</span>
               </div>
             </div>
           </div>
