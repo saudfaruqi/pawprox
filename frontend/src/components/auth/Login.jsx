@@ -56,7 +56,7 @@ const Login = () => {
     setLoading(true);
     try {
       // Replace with your real API endpoint
-      const response = await axios.post("http://localhost:5001/api/auth/login", { email, password });
+      const response = await axios.post("https://pawprox-6dd216fb1ef5.herokuapp.com/api/auth/login", { email, password });
       
       // Save token and user object if login is successful
       localStorage.setItem("token", response.data.token);
@@ -95,7 +95,7 @@ const Login = () => {
     setLoading(true);
     try {
       // Replace with your real API endpoint
-      await axios.post("http://localhost:5001/api/auth/forgot-password", { email: forgotPasswordEmail });
+      await axios.post("https://pawprox-6dd216fb1ef5.herokuapp.com/api/auth/forgot-password", { email: forgotPasswordEmail });
       setForgotPasswordSuccess("Password reset link sent to your email. Please check your inbox.");
     } catch (err) {
       console.error(err);

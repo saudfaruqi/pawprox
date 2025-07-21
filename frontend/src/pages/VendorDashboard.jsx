@@ -33,20 +33,20 @@ const VendorDashboard = () => {
         const token = localStorage.getItem("token");
         
         // Fetch vendor profile
-        const profileResponse = await axios.get("http://localhost:5001/api/vendor/profile", {
+        const profileResponse = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/profile", {
           headers: { Authorization: `Bearer ${token}` }
         });
         setVendorInfo(profileResponse.data);
         
         // Fetch recent orders
-        const ordersResponse = await axios.get("http://localhost:5001/api/orders/vendor?limit=5", {
+        const ordersResponse = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders/vendor?limit=5", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const orders = ordersResponse.data.orders || [];
         setRecentOrders(orders);
         
         // Fetch products count
-        const productsResponse = await axios.get("http://localhost:5001/api/vendor/products", {
+        const productsResponse = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/products", {
           headers: { Authorization: `Bearer ${token}` }
         });
         // Assumes backend returns { products: [...] }
@@ -131,7 +131,7 @@ const VendorDashboard = () => {
     setUpdateSuccess('');
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.put("http://localhost:5001/api/vendor/profile/edit", profileFormData, {
+      const response = await axios.put("https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/profile/edit", profileFormData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUpdateSuccess("Profile updated successfully!");
@@ -358,7 +358,7 @@ const VendorDashboard = () => {
                           <div className="w-12 h-12 bg-gray-200 rounded-md flex-shrink-0 overflow-hidden">
                             {order.image ? (
                               <img 
-                                src={`http://localhost:5001/${order.image}`} 
+                                src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${order.image}`} 
                                 alt={order.title} 
                                 className="w-full h-full object-cover" 
                               />

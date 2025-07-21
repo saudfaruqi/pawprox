@@ -50,7 +50,7 @@ const VendorProducts = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5001/api/vendor/products", {
+      const response = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/products", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const fetchedProducts = response.data.products;
@@ -157,7 +157,7 @@ const VendorProducts = () => {
       const token = localStorage.getItem("token");
       let response;
       if (editingProduct) {
-        response = await axios.put(`http://localhost:5001/api/vendor/products/${editingProduct.id}`, data, {
+        response = await axios.put(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/products/${editingProduct.id}`, data, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data"
@@ -165,7 +165,7 @@ const VendorProducts = () => {
         });
         setSuccess("Product updated successfully");
       } else {
-        response = await axios.post('http://localhost:5001/api/vendor/products', data, {
+        response = await axios.post('https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/products', data, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data"
@@ -203,14 +203,14 @@ const VendorProducts = () => {
     });
     setEditingProduct(product);
     if (product.image) {
-      setPreviewURL(`http://localhost:5001/${product.image}`);
+      setPreviewURL(`https://pawprox-6dd216fb1ef5.herokuapp.com/${product.image}`);
     } else {
       setPreviewURL('');
     }
     if (product.detail_images) {
       try {
         const detailImgs = JSON.parse(product.detail_images);
-        setDetailPreviewURLs(detailImgs.map(img => `http://localhost:5001/${img}`));
+        setDetailPreviewURLs(detailImgs.map(img => `https://pawprox-6dd216fb1ef5.herokuapp.com/${img}`));
       } catch (e) {
         console.error("Error parsing detail images", e);
       }
@@ -224,7 +224,7 @@ const VendorProducts = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5001/api/vendor/products/${productId}`, {
+      await axios.delete(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/products/${productId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSuccess("Product deleted successfully");
@@ -656,7 +656,7 @@ const VendorProducts = () => {
                 {product.image ? (
                   <div className="relative h-48 bg-gray-200">
                     <img 
-                      src={`http://localhost:5001/${product.image}`} 
+                      src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${product.image}`} 
                       alt={product.title} 
                       className="w-full h-full object-cover" 
                     />

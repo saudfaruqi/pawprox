@@ -45,7 +45,7 @@ const VendorOrders = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5001/api/orders/vendor", {
+      const response = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders/vendor", {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -91,7 +91,7 @@ const VendorOrders = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5001/api/orders/${orderId}/status`,
+        `https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders/${orderId}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -135,7 +135,7 @@ const VendorOrders = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5001/api/orders/${orderId}/tracking`,
+        `https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders/${orderId}/tracking`,
         { 
           tracking_number: trackingNumber,
           carrier_slug: trackingInfo.carrierSlug

@@ -120,7 +120,7 @@ const handleSubmit = async (e) => {
 
   try {
     await axios.post(
-      "http://localhost:5001/api/contact",
+      "https://pawprox-6dd216fb1ef5.herokuapp.com/api/contact",
       payload,
       { headers: { "Content-Type": "multipart/form-data" } }
     );

@@ -108,7 +108,7 @@ const PetCard = ({ alert, onEdit, onDelete }) => {
       <div className="relative">
         {alert.image ? (
           <img 
-            src={`http://localhost:5001/${alert.image}`} 
+            src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${alert.image}`} 
             alt={alert.petName} 
             className="w-full h-48 object-cover" 
           />
@@ -371,7 +371,7 @@ const LostFound = () => {
     const fetchPetAlerts = async () => {
       setLoading(true);
       try {
-        const response = await fetch('http://localhost:5001/api/lost-found');
+        const response = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/lost-found');
         const data = await response.json();
         setPetAlerts(data);
       } catch (err) {
@@ -443,7 +443,7 @@ const LostFound = () => {
   // Handle deletion of an alert
   const handleDeleteAlert = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/lost-found/${id}`, {
+      const response = await fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/lost-found/${id}`, {
         method: 'DELETE'
       });
       if (!response.ok) throw new Error('Failed to delete alert');
@@ -468,7 +468,7 @@ const LostFound = () => {
       contactInfo: alert.contactInfo,
       lastSeen: alert.lastSeen,
     });
-    setImagePreview(alert.image ? `http://localhost:5001/${alert.image}` : null);
+    setImagePreview(alert.image ? `https://pawprox-6dd216fb1ef5.herokuapp.com/${alert.image}` : null);
     setShowForm(true);
   };
 
@@ -501,7 +501,7 @@ const LostFound = () => {
 
       if (editingAlert) {
         // Update existing alert
-        const response = await fetch(`http://localhost:5001/api/lost-found/${editingAlert.id}`, {
+        const response = await fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/lost-found/${editingAlert.id}`, {
           method: 'PUT',
           body: data
         });
@@ -512,7 +512,7 @@ const LostFound = () => {
         setEditingAlert(null);
       } else {
         // Create new alert
-        const response = await fetch('http://localhost:5001/api/lost-found', {
+        const response = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/lost-found', {
           method: 'POST',
           body: data
         });

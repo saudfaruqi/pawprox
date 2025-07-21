@@ -40,7 +40,7 @@ const OrderHistory = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5001/api/orders", {
+      const response = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setOrders(response.data.orders);
@@ -186,7 +186,7 @@ const OrderHistory = () => {
     setIsLoading((prev) => ({ ...prev, [order.id]: "reorder" }));
     try {
       const response = await axios.post(
-        `http://localhost:5001/api/orders/${order.id}/reorder`,
+        `https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders/${order.id}/reorder`,
         {},
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
@@ -212,7 +212,7 @@ const OrderHistory = () => {
     setIsLoading((prev) => ({ ...prev, [order.id]: "invoice" }));
     try {
       const response = await axios.get(
-        `http://localhost:5001/api/orders/${order.id}/invoice`,
+        `https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders/${order.id}/invoice`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           responseType: "blob",
@@ -246,7 +246,7 @@ const OrderHistory = () => {
     setIsLoading((prev) => ({ ...prev, [order.id]: "track" }));
     try {
       const response = await axios.get(
-        `http://localhost:5001/api/orders/${order.id}/track`,
+        `https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders/${order.id}/track`,
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
       const { tracking } = response.data;
@@ -276,7 +276,7 @@ const OrderHistory = () => {
       setIsLoading((prev) => ({ ...prev, [order.id]: "cancel" }));
       try {
         const response = await axios.put(
-          `http://localhost:5001/api/orders/${order.id}/status`,
+          `https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders/${order.id}/status`,
           { status: "cancelled" },
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
@@ -610,7 +610,7 @@ const OrderHistory = () => {
                                       src={
                                         item.product_image?.startsWith("data:")
                                           ? item.product_image
-                                          : `http://localhost:5001/${item.product_image}`
+                                          : `https://pawprox-6dd216fb1ef5.herokuapp.com/${item.product_image}`
                                       }
                                       alt={item.product_name}
                                       className="h-12 w-12 object-cover rounded-md"

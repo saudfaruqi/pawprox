@@ -79,14 +79,14 @@ const ProductDetails = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`http://localhost:5001/api/marketplace/${productId}`);
+        const response = await axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/marketplace/${productId}`);
         const productData = response.data.item;
         setProduct(productData);
         
         setSelectedImage(
           productData.image?.startsWith("data:") 
             ? productData.image 
-            : `http://localhost:5001/${productData.image}`
+            : `https://pawprox-6dd216fb1ef5.herokuapp.com/${productData.image}`
         );
 
         // Check favorites
@@ -120,7 +120,7 @@ const ProductDetails = () => {
   // Fetch recommendations
   const fetchRecommendations = async (category) => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/marketplace?category=${category}`);
+      const response = await axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/marketplace?category=${category}`);
       const items = response.data.items || response.data;
       const filteredRecommendations = items.filter(
         (item) => item.id !== parseInt(productId)
@@ -134,7 +134,7 @@ const ProductDetails = () => {
 // Fetch reviews as soon as the product is loaded, not only when tab changes
 useEffect(() => {
   if (product) {
-    axios.get(`http://localhost:5001/api/reviews?productId=${product.id}`)
+    axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews?productId=${product.id}`)
       .then(response => setReviews(response.data.reviews))
       .catch(err => console.error("Error fetching reviews", err));
   }
@@ -229,8 +229,8 @@ const handleReviewSubmit = async (e) => {
     
     console.log("Request data being sent:", requestData);
     console.log("Request URL:", editingReview ? 
-      `http://localhost:5001/api/reviews/${editingReview.id}` : 
-      "http://localhost:5001/api/reviews"
+      `https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews/${editingReview.id}` : 
+      "https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews"
     );
     
     let response;
@@ -239,7 +239,7 @@ const handleReviewSubmit = async (e) => {
       // Update existing review
       console.log("Updating review with ID:", editingReview.id);
       response = await axios.put(
-        `http://localhost:5001/api/reviews/${editingReview.id}`,
+        `https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews/${editingReview.id}`,
         {
           rating: Number(reviewRating),
           comment: reviewComment.trim()
@@ -255,7 +255,7 @@ const handleReviewSubmit = async (e) => {
       // Create new review
       console.log("Creating new review");
       response = await axios.post(
-        "http://localhost:5001/api/reviews",
+        "https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews",
         requestData,
         {
           headers: { 
@@ -271,7 +271,7 @@ const handleReviewSubmit = async (e) => {
     
     // Refresh reviews and user review
     try {
-      const { data } = await axios.get(`http://localhost:5001/api/reviews?productId=${product.id}`);
+      const { data } = await axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews?productId=${product.id}`);
       setReviews(data.reviews);
       await fetchUserReview();
     } catch (refreshError) {
@@ -349,7 +349,7 @@ const handleDeleteReview = async (reviewId) => {
     console.log("Using token:", !!token);
     
     const response = await axios.delete(
-      `http://localhost:5001/api/reviews/${reviewId}`,
+      `https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews/${reviewId}`,
       {
         headers: { 
           Authorization: `Bearer ${token}`,
@@ -363,7 +363,7 @@ const handleDeleteReview = async (reviewId) => {
     
     // Refresh reviews and user review
     try {
-      const { data } = await axios.get(`http://localhost:5001/api/reviews?productId=${product.id}`);
+      const { data } = await axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews?productId=${product.id}`);
       setReviews(data.reviews);
       setUserReview(null);
     } catch (refreshError) {
@@ -416,7 +416,7 @@ const fetchUserReview = async () => {
     console.log("Fetching user review for product:", product.id);
     
     const response = await axios.get(
-      `http://localhost:5001/api/reviews/user/${product.id}`,
+      `https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews/user/${product.id}`,
       {
         headers: { Authorization: `Bearer ${token}` }
       }
@@ -461,16 +461,16 @@ const fetchUserReview = async () => {
   ? [
       product.image?.startsWith("data:")
         ? product.image
-        : `http://localhost:5001/${product.image}`,
+        : `https://pawprox-6dd216fb1ef5.herokuapp.com/${product.image}`,
       ...(product.detail_images
-        ? JSON.parse(product.detail_images).map((img) => `http://localhost:5001/${img}`)
+        ? JSON.parse(product.detail_images).map((img) => `https://pawprox-6dd216fb1ef5.herokuapp.com/${img}`)
         : [])
     ]
   : [];
 
   const getProfilePicUrl = (pic) => {
     if (!pic) return null;
-    return pic.startsWith('http') ? pic : `http://localhost:5001/${pic}`;
+    return pic.startsWith('http') ? pic : `https://pawprox-6dd216fb1ef5.herokuapp.com/${pic}`;
   };
 
 
@@ -986,7 +986,7 @@ const fetchUserReview = async () => {
                     <div className="flex-shrink-0">
                       {review.profilePic ? (
                         <img
-                          src={review.profilePic.startsWith('http') ? review.profilePic : `http://localhost:5001/${review.profilePic}`}
+                          src={review.profilePic.startsWith('http') ? review.profilePic : `https://pawprox-6dd216fb1ef5.herokuapp.com/${review.profilePic}`}
                           alt={`${review.username}'s profile`}
                           className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
                           onError={(e) => {
@@ -1219,7 +1219,7 @@ const fetchUserReview = async () => {
                         src={
                           recommendation.image?.startsWith("data:")
                             ? recommendation.image
-                            : `http://localhost:5001/${recommendation.image}`
+                            : `https://pawprox-6dd216fb1ef5.herokuapp.com/${recommendation.image}`
                         }
                         alt={recommendation.title}
                         className="w-full h-48 object-cover"

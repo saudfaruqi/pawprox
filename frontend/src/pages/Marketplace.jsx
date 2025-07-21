@@ -39,7 +39,7 @@ const Marketplace = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://localhost:5001/api/marketplace");
+      const response = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/marketplace");
       const items = response.data.items || response.data;
       setProducts(items);
     } catch (error) {

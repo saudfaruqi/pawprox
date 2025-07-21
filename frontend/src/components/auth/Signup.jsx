@@ -134,7 +134,7 @@ const Signup = () => {
     delete submissionData.confirmPassword;
     
     try {
-        const { data } = await axios.post("http://localhost:5001/api/auth/signup", submissionData);
+        const { data } = await axios.post("https://pawprox-6dd216fb1ef5.herokuapp.com/api/auth/signup", submissionData);
 
         // Store token and user info
         localStorage.setItem("token", data.token);

@@ -16,7 +16,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Sidebar from '../components/Sidebar';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://pawprox-6dd216fb1ef5.herokuapp.com/api';
 
 // Get current user from localStorage
 const storedUser = localStorage.getItem("user");

@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:5001",
+  "proxy": "https://pawprox-6dd216fb1ef5.herokuapp.com",
   "dependencies": {
     "@headlessui/react": "^2.2.0",
     "axios": "^1.7.9",

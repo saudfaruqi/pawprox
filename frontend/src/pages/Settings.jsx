@@ -63,7 +63,7 @@ const Settings = () => {
     const fetchData = async () => {
       try {
         // Fetch user profile
-        const userRes = await fetch('http://localhost:5001/api/users/profile', {
+        const userRes = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/profile', {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -91,7 +91,7 @@ const Settings = () => {
         }
               
         // Fetch pet profiles
-        const petRes = await fetch('http://localhost:5001/api/pets', {
+        const petRes = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets', {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -135,7 +135,7 @@ const Settings = () => {
   const handleVendorSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5001/api/vendor/become', {
+      const response = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/become', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -182,7 +182,7 @@ const Settings = () => {
       if (editedUser.profilePic instanceof File) {
         formData.append('profilePic', editedUser.profilePic);
       }
-      const res = await fetch('http://localhost:5001/api/users/profile', {
+      const res = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/profile', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -207,7 +207,7 @@ const Settings = () => {
   // Delete account
   const handleDeleteAccount = async () => {
     try {
-      const res = await fetch('http://localhost:5001/api/users', {
+      const res = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/users', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +249,7 @@ const Settings = () => {
       return;
     }
     try {
-      const res = await fetch('http://localhost:5001/api/users/password', {
+      const res = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -287,7 +287,7 @@ const Settings = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch('http://localhost:5001/api/users/preferences', {
+      const res = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/preferences', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -337,7 +337,7 @@ const Settings = () => {
   const handleDeletePet = async (petId) => {
     if (!window.confirm('Are you sure you want to delete this pet profile?')) return;
     try {
-      const res = await fetch(`http://localhost:5001/api/pets/${petId}`, {
+      const res = await fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets/${petId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -429,7 +429,7 @@ const Settings = () => {
                       <div className="w-32 h-32 rounded-full overflow-hidden mb-4 mx-auto border-4 border-white shadow-lg">
                         {user.profilePic ? (
                           <img
-                            src={`http://localhost:5001/${user.profilePic}`}
+                            src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${user.profilePic}`}
                             alt="Profile"
                             className="w-full h-full object-cover"
                           />
@@ -556,7 +556,7 @@ const Settings = () => {
                               ) : (
                                 editedUser.profilePic && (
                                   <img
-                                    src={`http://localhost:5001/${editedUser.profilePic}`}
+                                    src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${editedUser.profilePic}`}
                                     alt="Profile"
                                     className="w-24 h-24 object-cover rounded-full"
                                   />
@@ -809,7 +809,7 @@ const Settings = () => {
                             src={
                               pet.photo.startsWith("data:")
                                 ? pet.photo
-                                : `http://localhost:5001/${pet.photo}`
+                                : `https://pawprox-6dd216fb1ef5.herokuapp.com/${pet.photo}`
                             }
                             alt={`${pet.name}'s photo`}
                             className="w-full h-full object-cover"
