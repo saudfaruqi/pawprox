@@ -106,7 +106,7 @@ const MedicalFacilities = () => {
 
       try {
         const { data } = await axios.get(
-          'https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets',
+          'https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets', 
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const pets = data.pets || data;
@@ -140,7 +140,7 @@ const MedicalFacilities = () => {
 
       try {
         const { data } = await axios.get(
-          'https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/profile',
+          'https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/profile', 
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setUserProfile(data.user);
@@ -170,7 +170,7 @@ const MedicalFacilities = () => {
       setVetsLoading(true);
       setError(null);
       try {
-        const response = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/veterinarians");
+        const response = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/veterinarians"); 
         console.log("Fetched vets:", response.data);
         const fetchedVets = response.data.items || response.data;
         setVets(fetchedVets);
@@ -190,7 +190,7 @@ const MedicalFacilities = () => {
         
         if (userId && token) {
           const response = await axios.get(
-            `https://pawprox-6dd216fb1ef5.herokuapp.com/api/medical-bookings?userId=${userId}`,
+            `https://pawprox-6dd216fb1ef5.herokuapp.com/api/medical-bookings?userId=${userId}`, 
             { headers: { Authorization: `Bearer ${token}` } }
           );
           serverHistory = response.data || [];
@@ -365,7 +365,7 @@ const MedicalFacilities = () => {
 
     try {
       const response = await axios.post(
-        "https://pawprox-6dd216fb1ef5.herokuapp.com/api/medical-bookings",
+        "https://pawprox-6dd216fb1ef5.herokuapp.com/api/medical-bookings", 
         bookingData,
         { headers: { Authorization: `Bearer ${token}` } }
       );

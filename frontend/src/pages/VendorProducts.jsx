@@ -49,7 +49,7 @@ const VendorProducts = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token"); 
       const response = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/products", {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -159,7 +159,7 @@ const VendorProducts = () => {
       if (editingProduct) {
         response = await axios.put(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/products/${editingProduct.id}`, data, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, 
             "Content-Type": "multipart/form-data"
           }
         });
@@ -167,7 +167,7 @@ const VendorProducts = () => {
       } else {
         response = await axios.post('https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/products', data, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, 
             "Content-Type": "multipart/form-data"
           }
         });
@@ -205,14 +205,14 @@ const VendorProducts = () => {
     if (product.image) {
       setPreviewURL(`https://pawprox-6dd216fb1ef5.herokuapp.com/${product.image}`);
     } else {
-      setPreviewURL('');
+      setPreviewURL(''); 
     }
     if (product.detail_images) {
       try {
         const detailImgs = JSON.parse(product.detail_images);
         setDetailPreviewURLs(detailImgs.map(img => `https://pawprox-6dd216fb1ef5.herokuapp.com/${img}`));
       } catch (e) {
-        console.error("Error parsing detail images", e);
+        console.error("Error parsing detail images", e); 
       }
     }
     setShowForm(true);
@@ -227,7 +227,7 @@ const VendorProducts = () => {
       await axios.delete(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/products/${productId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setSuccess("Product deleted successfully");
+      setSuccess("Product deleted successfully"); 
       fetchProducts();
     } catch (err) {
       console.error(err);
@@ -658,7 +658,7 @@ const VendorProducts = () => {
                     <img 
                       src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${product.image}`} 
                       alt={product.title} 
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-cover"  
                     />
                     {product.stock <= 5 && product.stock > 0 && (
                       <div className="absolute top-2 right-2 bg-amber-500 text-white text-xs px-2 py-1 rounded-full">

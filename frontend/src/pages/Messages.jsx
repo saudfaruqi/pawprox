@@ -53,7 +53,7 @@ const Message = ({ message, onLike, onReply, currentUserId, onDelete }) => {
   // Helper to get a full URL if the profilePic is a relative path
   const getProfilePicUrl = (pic) => {
     if (!pic) return null;
-    return pic.startsWith('http') ? pic : `https://pawprox-6dd216fb1ef5.herokuapp.com/${pic}`;
+    return pic.startsWith('http') ? pic : `https://pawprox-6dd216fb1ef5.herokuapp.com/${pic}`; 
   };
 
   return (
@@ -208,7 +208,7 @@ const UserSearchResults = ({ users, friendStatuses, onSelectUser, onSendFriendRe
               <div className="flex items-center space-x-3" onClick={() => onSelectUser(user)}>
                 {user.profilePic ? (
                   <img 
-                    src={user.profilePic.startsWith('http') ? user.profilePic : `https://pawprox-6dd216fb1ef5.herokuapp.com/${user.profilePic}`} 
+                    src={user.profilePic.startsWith('http') ? user.profilePic : `https://pawprox-6dd216fb1ef5.herokuapp.com/${user.profilePic}`}  
                     alt={user.username} 
                     className="w-9 h-9 rounded-full object-cover"
                   />
@@ -255,7 +255,7 @@ const FriendRequests = ({ requests, onAccept, onDecline }) => {
               <div className="flex items-center space-x-3">
                 {req.senderPic ? (
                   <img
-                    src={req.senderPic.startsWith('http') ? req.senderPic : `https://pawprox-6dd216fb1ef5.herokuapp.com/${req.senderPic}`}
+                    src={req.senderPic.startsWith('http') ? req.senderPic : `https://pawprox-6dd216fb1ef5.herokuapp.com/${req.senderPic}`} 
                     alt={req.senderName}
                     className="h-9 w-9 rounded-full object-cover"
                   />
@@ -315,7 +315,7 @@ const FriendsList = ({ friends, onSelectFriend, onRemoveFriend, selectedFriendId
                 <div className="relative">
                   {friend.profilePic ? (
                     <img 
-                      src={friend.profilePic.startsWith('http') ? friend.profilePic : `https://pawprox-6dd216fb1ef5.herokuapp.com/${friend.profilePic}`} 
+                      src={friend.profilePic.startsWith('http') ? friend.profilePic : `https://pawprox-6dd216fb1ef5.herokuapp.com/${friend.profilePic}`}  
                       alt={friend.username} 
                       className="w-10 h-10 rounded-full object-cover"
                     />
@@ -411,7 +411,7 @@ const Chat = () => {
 
   // Establish Socket.IO connection
   useEffect(() => {
-    const newSocket = io('https://pawprox-6dd216fb1ef5.herokuapp.com', {
+    const newSocket = io('https://pawprox-6dd216fb1ef5.herokuapp.com', { 
       auth: { token: localStorage.getItem('token') },
     });
     
@@ -446,7 +446,7 @@ const Chat = () => {
     }
     
     setIsLoading(true);
-    const url = `https://pawprox-6dd216fb1ef5.herokuapp.com/api/users?search=${encodeURIComponent(debouncedSearch)}`;
+    const url = `https://pawprox-6dd216fb1ef5.herokuapp.com/api/users?search=${encodeURIComponent(debouncedSearch)}`; 
     
     fetch(url, {
       headers: {
@@ -467,7 +467,7 @@ const Chat = () => {
         // Check friend status for each result
         Promise.all(
           filtered.map(user =>
-            fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/check/${user.id}`, {
+            fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/check/${user.id}`, { 
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -499,7 +499,7 @@ const Chat = () => {
     };
     
     setIsLoading(true);
-    const url = `https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/accepted`;
+    const url = `https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/accepted`; 
     
     fetch(url, {
       headers: {
@@ -529,7 +529,7 @@ const Chat = () => {
 
   // Fetch incoming friend requests
   useEffect(() => {
-    const url = `https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/requests`;
+    const url = `https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/requests`; 
     
     fetch(url, {
       headers: {
@@ -559,7 +559,7 @@ const Chat = () => {
       // Reset unread count for this friend
       setUnreadCounts(prev => ({ ...prev, [selectedUser.id]: 0 }));
       
-      fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/chat/conversation?receiver_id=${selectedUser.id}`, {
+      fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/chat/conversation?receiver_id=${selectedUser.id}`, { 
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -660,7 +660,7 @@ const Chat = () => {
 
   // Friend request actions using modals instead of alerts
   const sendFriendRequest = (userId) => {
-    fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/send', {
+    fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/send', { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -680,7 +680,7 @@ const Chat = () => {
   };
 
   const handleAcceptRequest = (requestId, senderId) => {
-    fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/accept/${requestId}`, {
+    fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/accept/${requestId}`, { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -693,7 +693,7 @@ const Chat = () => {
         setFriendRequests(prev => prev.filter(req => req.id !== requestId));
         
         // Fetch the friend's details to add to friendsList
-        fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/${senderId}`, {
+        fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/${senderId}`, { 
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -709,7 +709,7 @@ const Chat = () => {
   };
 
   const handleDeclineRequest = (requestId) => {
-    fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/decline/${requestId}`, {
+    fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/decline/${requestId}`, { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -728,7 +728,7 @@ const Chat = () => {
       title: 'Remove Friend',
       message: 'Are you sure you want to remove this friend?',
       onConfirm: () => {
-         fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/remove/${friendId}`, {
+         fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/friends/remove/${friendId}`, { 
            method: 'DELETE',
            headers: {
              'Content-Type': 'application/json',

@@ -318,7 +318,7 @@ const Header = () => {
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
                     {user?.profilePic ? (
                       <img
-                        src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${user.profilePic}`}
+                        src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${user.profilePic}`} 
                         alt="Profile"
                         className="w-full h-full object-cover"
                       />
@@ -501,7 +501,7 @@ const Header = () => {
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
                     {user?.profilePic ? (
                       <img
-                        src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${user.profilePic}`}
+                        src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${user.profilePic}`} 
                         alt="Profile"
                         className="w-full h-full object-cover"
                       />

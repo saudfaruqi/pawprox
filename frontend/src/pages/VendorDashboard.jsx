@@ -30,19 +30,19 @@ const VendorDashboard = () => {
   useEffect(() => {
     const fetchVendorData = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token"); 
         
         // Fetch vendor profile
         const profileResponse = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/profile", {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setVendorInfo(profileResponse.data);
+        setVendorInfo(profileResponse.data); 
         
         // Fetch recent orders
         const ordersResponse = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders/vendor?limit=5", {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const orders = ordersResponse.data.orders || [];
+        const orders = ordersResponse.data.orders || []; 
         setRecentOrders(orders);
         
         // Fetch products count
@@ -130,7 +130,7 @@ const VendorDashboard = () => {
     setUpdateError('');
     setUpdateSuccess('');
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token"); 
       const response = await axios.put("https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/profile/edit", profileFormData, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -356,7 +356,7 @@ const VendorDashboard = () => {
                       <div key={order.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50">
                         <div className="flex items-center">
                           <div className="w-12 h-12 bg-gray-200 rounded-md flex-shrink-0 overflow-hidden">
-                            {order.image ? (
+                            {order.image ? ( 
                               <img 
                                 src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${order.image}`} 
                                 alt={order.title} 

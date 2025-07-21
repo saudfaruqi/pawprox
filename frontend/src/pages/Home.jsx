@@ -294,7 +294,7 @@ const WebsiteLayout = () => {
                 throw new Error("Authentication required");
             }
             
-            const response = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/savePetProfile', {
+            const response = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/savePetProfile', { 
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

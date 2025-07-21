@@ -19,7 +19,7 @@ export default function ResetPassword() {
     setError('');
     if (newPassword.length < 6) {
       return setError('Password must be at least 6 characters');
-    }
+    } 
     try {
       await axios.post('https://pawprox-6dd216fb1ef5.herokuapp.com/api/auth/reset-password', {
         token,

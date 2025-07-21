@@ -167,7 +167,7 @@ const PetProfileWizard = ({ onComplete, onSkip, onClose, initialData }) => {
       
       if (initialData && initialData.id) {
         // Update existing pet profile
-        response = await fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets/${initialData.id}`, {
+        response = await fetch(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets/${initialData.id}`, { 
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -177,7 +177,7 @@ const PetProfileWizard = ({ onComplete, onSkip, onClose, initialData }) => {
         });
       } else {
         // Create new pet profile
-        response = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets', {
+        response = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets', { 
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

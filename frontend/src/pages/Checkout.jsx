@@ -73,7 +73,7 @@ useEffect(() => {
   const fetchShippingTax = async () => {
     try {
       const response = await axios.post(
-        `https://pawprox-6dd216fb1ef5.herokuapp.com/api/shipping-tax`,
+        `https://pawprox-6dd216fb1ef5.herokuapp.com/api/shipping-tax`, 
         { orderItems: cartItems.map(item => ({ productId: item.id, quantity: item.quantity })) },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
@@ -206,7 +206,7 @@ useEffect(() => {
       const fullShippingAddress = `${paymentInfo.shippingAddress}, ${paymentInfo.area}, ${paymentInfo.city}, ${paymentInfo.state}, ${paymentInfo.country}`;
   
       const response = await axios.post(
-        "https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders",
+        "https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders", 
         {
           orderItems: cartItems.map((item) => ({
             productId: item.id,
@@ -578,7 +578,7 @@ useEffect(() => {
                     <div className="flex items-center">
                       {item.image && (
                         <div className="relative">
-                          <img
+                          <img 
                             src={item.image?.startsWith("data:") ? item.image : `https://pawprox-6dd216fb1ef5.herokuapp.com/${item.image}`}
                             alt={item.title}
                             className="h-16 w-16 object-cover rounded mr-4"

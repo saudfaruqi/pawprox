@@ -79,7 +79,7 @@ const ProductDetails = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/marketplace/${productId}`);
+        const response = await axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/marketplace/${productId}`);  
         const productData = response.data.item;
         setProduct(productData);
         
@@ -120,7 +120,7 @@ const ProductDetails = () => {
   // Fetch recommendations
   const fetchRecommendations = async (category) => {
     try {
-      const response = await axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/marketplace?category=${category}`);
+      const response = await axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/marketplace?category=${category}`); 
       const items = response.data.items || response.data;
       const filteredRecommendations = items.filter(
         (item) => item.id !== parseInt(productId)
@@ -134,7 +134,7 @@ const ProductDetails = () => {
 // Fetch reviews as soon as the product is loaded, not only when tab changes
 useEffect(() => {
   if (product) {
-    axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews?productId=${product.id}`)
+    axios.get(`https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews?productId=${product.id}`) 
       .then(response => setReviews(response.data.reviews))
       .catch(err => console.error("Error fetching reviews", err));
   }
@@ -229,8 +229,8 @@ const handleReviewSubmit = async (e) => {
     
     console.log("Request data being sent:", requestData);
     console.log("Request URL:", editingReview ? 
-      `https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews/${editingReview.id}` : 
-      "https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews"
+      `https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews/${editingReview.id}` :  
+      "https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews" 
     );
     
     let response;
@@ -242,7 +242,7 @@ const handleReviewSubmit = async (e) => {
         `https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews/${editingReview.id}`,
         {
           rating: Number(reviewRating),
-          comment: reviewComment.trim()
+          comment: reviewComment.trim() 
         },
         {
           headers: { 
@@ -260,7 +260,7 @@ const handleReviewSubmit = async (e) => {
         {
           headers: { 
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json' 
           }
         }
       );
@@ -279,7 +279,7 @@ const handleReviewSubmit = async (e) => {
       // Don't show an error for this, the main operation succeeded
     }
     
-    // Reset form
+    // Reset form 
     setReviewComment("");
     setReviewRating(5);
     setIsReviewFormVisible(false);
@@ -351,7 +351,7 @@ const handleDeleteReview = async (reviewId) => {
     const response = await axios.delete(
       `https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews/${reviewId}`,
       {
-        headers: { 
+        headers: {  
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
@@ -367,7 +367,7 @@ const handleDeleteReview = async (reviewId) => {
       setReviews(data.reviews);
       setUserReview(null);
     } catch (refreshError) {
-      console.error("Error refreshing reviews after delete:", refreshError);
+      console.error("Error refreshing reviews after delete:", refreshError); 
       // The delete succeeded, so we can still show success
     }
     
@@ -417,7 +417,7 @@ const fetchUserReview = async () => {
     
     const response = await axios.get(
       `https://pawprox-6dd216fb1ef5.herokuapp.com/api/reviews/user/${product.id}`,
-      {
+      { 
         headers: { Authorization: `Bearer ${token}` }
       }
     );
@@ -464,9 +464,9 @@ const fetchUserReview = async () => {
         : `https://pawprox-6dd216fb1ef5.herokuapp.com/${product.image}`,
       ...(product.detail_images
         ? JSON.parse(product.detail_images).map((img) => `https://pawprox-6dd216fb1ef5.herokuapp.com/${img}`)
-        : [])
+        : []) 
     ]
-  : [];
+  : [];  
 
   const getProfilePicUrl = (pic) => {
     if (!pic) return null;
@@ -980,7 +980,7 @@ const fetchUserReview = async () => {
                   key={review.id} 
                   className={`border p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 ${
                     isUserReview ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'
-                  }`}
+                  }`} 
                 >
                   <div className="flex items-start space-x-4 mb-4">
                     <div className="flex-shrink-0">
@@ -1215,7 +1215,7 @@ const fetchUserReview = async () => {
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300"
                   >
                     <Link to={`/product/${recommendation.id}`}>
-                      <img
+                      <img 
                         src={
                           recommendation.image?.startsWith("data:")
                             ? recommendation.image

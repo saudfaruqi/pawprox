@@ -51,7 +51,7 @@ const PetCareServices = () => {
         const token = localStorage.getItem("token");
         if (!token) return;
         const { data } = await axios.get(
-          "https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets",
+          "https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets", 
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const pets = data.pets || data;
@@ -86,7 +86,7 @@ const PetCareServices = () => {
         const token = localStorage.getItem("token");
         if (!token) return;
         const { data } = await axios.get(
-          "https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/profile",
+          "https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/profile", 
           { headers: { Authorization: `Bearer ${token}` } }
         );
         // assuming your endpoint returns { user: { phone, email, ... } }
@@ -127,7 +127,7 @@ const PetCareServices = () => {
     const fetchServices = async () => {
       try {
         setError('');
-        const response = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/petcare");
+        const response = await axios.get("https://pawprox-6dd216fb1ef5.herokuapp.com/api/petcare"); 
         // Use response.data.items if exists; otherwise, assume the response is an array
         const fetchedServices = response.data.items || response.data;
         setServices(fetchedServices);
@@ -198,7 +198,7 @@ const handleSubmit = async (e) => {
     const { data } = await axios.post(
       "https://pawprox-6dd216fb1ef5.herokuapp.com/api/bookings",
       payload,
-      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } } 
     );
 
     // 2️⃣ Grab the bookingId from response
@@ -246,7 +246,7 @@ const handleCancel = async (bookingId) => {
     // call your cancel endpoint
     await axios.delete(
       `https://pawprox-6dd216fb1ef5.herokuapp.com/api/bookings/${bookingId}`,
-      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } } 
     );
     // if HTTP 200, update local list
     setBookingHistory(prev =>
@@ -283,7 +283,7 @@ const handleReschedule = async (bookingId) => {
   try {
     // call your update endpoint
     await axios.put(
-      `https://pawprox-6dd216fb1ef5.herokuapp.com/api/bookings/${bookingId}`,
+      `https://pawprox-6dd216fb1ef5.herokuapp.com/api/bookings/${bookingId}`, 
       { date: booking.date, time: booking.time, status: 'Confirmed' },
       { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
     );

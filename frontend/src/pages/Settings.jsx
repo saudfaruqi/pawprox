@@ -60,7 +60,7 @@ const Settings = () => {
       return;
     }
     
-    const fetchData = async () => {
+    const fetchData = async () => { 
       try {
         // Fetch user profile
         const userRes = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/profile', {
@@ -88,7 +88,7 @@ const Settings = () => {
         setEditedUser(normalizedUser);
         if (normalizedUser.preferences) {
           setPreferences(JSON.parse(normalizedUser.preferences));
-        }
+        } 
               
         // Fetch pet profiles
         const petRes = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/pets', {
@@ -134,7 +134,7 @@ const Settings = () => {
   
   const handleVendorSubmit = async (e) => {
     e.preventDefault();
-    try {
+    try { 
       const response = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/vendor/become', {
         method: 'POST',
         headers: {
@@ -181,7 +181,7 @@ const Settings = () => {
       formData.append('phone', editedUser.phone);
       if (editedUser.profilePic instanceof File) {
         formData.append('profilePic', editedUser.profilePic);
-      }
+      } 
       const res = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/profile', {
         method: 'PUT',
         headers: {
@@ -202,7 +202,7 @@ const Settings = () => {
       console.error('Error updating profile:', error);
       toast.error("An error occurred while updating your profile.");
     }
-  };
+  }; 
   
   // Delete account
   const handleDeleteAccount = async () => {
@@ -247,7 +247,7 @@ const Settings = () => {
     if (securityData.newPassword !== securityData.confirmPassword) {
       toast.error("New password and confirmation do not match");
       return;
-    }
+    } 
     try {
       const res = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/password', {
         method: 'PUT',
@@ -285,7 +285,7 @@ const Settings = () => {
   
   const handlePreferencesUpdate = async (e) => {
     e.preventDefault();
-
+ 
     try {
       const res = await fetch('https://pawprox-6dd216fb1ef5.herokuapp.com/api/users/preferences', {
         method: 'PUT',
@@ -329,7 +329,7 @@ const Settings = () => {
       toast.error(err.message || 'Failed to update preferences');
     }
   };
-
+ 
 
   const [showPetWizard, setShowPetWizard] = useState(false);
   const [petToEdit, setPetToEdit] = useState(null);
@@ -421,7 +421,7 @@ const Settings = () => {
             
             {/* Conditional Tab Content */}
             {activeTab === 'profile' && (
-              <div className="p-6">
+              <div className="p-6"> 
                 <div className="flex flex-col md:flex-row gap-8">
                   {/* Left column - User Profile */}
                   <div className="md:w-1/3">
@@ -553,7 +553,7 @@ const Settings = () => {
                                   alt="Profile Preview"
                                   className="w-24 h-24 object-cover rounded-full"
                                 />
-                              ) : (
+                              ) : ( 
                                 editedUser.profilePic && (
                                   <img
                                     src={`https://pawprox-6dd216fb1ef5.herokuapp.com/${editedUser.profilePic}`}
@@ -806,7 +806,7 @@ const Settings = () => {
                       {pet.photo && (
                         <div className="h-48 overflow-hidden">
                           <img
-                            src={
+                            src={ 
                               pet.photo.startsWith("data:")
                                 ? pet.photo
                                 : `https://pawprox-6dd216fb1ef5.herokuapp.com/${pet.photo}`
