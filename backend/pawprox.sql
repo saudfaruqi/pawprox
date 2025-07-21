@@ -291,6 +291,72 @@ CREATE TABLE veterinarians (
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
+-- Insert Karachi-based veterinarians
+INSERT INTO veterinarians (
+  name, specialty, experience, image, availability, location, rating, reviews, languages, certifications
+) VALUES
+(
+  'Dr. Areeba Khan',
+  'Small Animal Surgery',
+  '10 years',
+  'https://via.placeholder.com/80',
+  'Mon-Fri',
+  'Clifton, Karachi',
+  4.7,
+  124,
+  '["English", "Urdu"]',
+  '["PVMC Certified", "Small Animal Surgeon"]'
+),
+(
+  'Dr. Kamran Siddiqui',
+  'Internal Medicine',
+  '15 years',
+  'https://via.placeholder.com/80',
+  'Tue-Sun',
+  'DHA Phase 5, Karachi',
+  4.9,
+  200,
+  '["English", "Urdu", "Sindhi"]',
+  '["PVMC Certified", "Animal Health Specialist"]'
+),
+(
+  'Dr. Maria Shah',
+  'Dermatology & Skin Care',
+  '8 years',
+  'https://via.placeholder.com/80',
+  'Mon-Sat',
+  'Gulshan-e-Iqbal, Karachi',
+  4.6,
+  87,
+  '["English", "Urdu"]',
+  '["Veterinary Dermatology Expert"]'
+),
+(
+  'Dr. Fahad Ali',
+  'Emergency & Critical Care',
+  '12 years',
+  'https://via.placeholder.com/80',
+  'Mon-Sun',
+  'North Nazimabad, Karachi',
+  4.8,
+  150,
+  '["English", "Urdu", "Punjabi"]',
+  '["Certified Emergency Vet", "PVMC Registered"]'
+),
+(
+  'Dr. Hina Mir',
+  'Exotic Animals & Birds',
+  '6 years',
+  'https://via.placeholder.com/80',
+  'Wed-Sun',
+  'Bahadurabad, Karachi',
+  4.5,
+  95,
+  '["English", "Urdu"]',
+  '["Avian Specialist", "PVMC Certified"]'
+);
+
+
 
 -- ================================
 -- Table: medical_bookings
