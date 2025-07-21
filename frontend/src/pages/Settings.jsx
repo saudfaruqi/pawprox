@@ -9,6 +9,10 @@ const Settings = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const storedUser = JSON.parse(localStorage.getItem('user'));
+
+  // At top of Settings component
+  const appliedBefore = localStorage.getItem('hasVendorApplied') === 'true';
+
   
   // States for user and pet data
   const [user, setUser] = useState(storedUser);
@@ -182,6 +186,8 @@ const handleVendorSubmit = async (e) => {
     
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
+
+    localStorage.setItem('hasVendorApplied', 'true');
     
     // Close modal and reset form
     setShowVendorModal(false);
@@ -644,7 +650,7 @@ const handleVendorSubmit = async (e) => {
       </div>
       
       {/* Show different UI based on vendor status */}
-      {!user.vendor ? (
+      {!user.vendor && !appliedBefore ? (
         // No vendor record - show apply button
         <div className="mt-4">
           <p className="text-gray-600 mb-4">
@@ -657,7 +663,7 @@ const handleVendorSubmit = async (e) => {
             Apply to Become Vendor
           </button>
         </div>
-      ) : user.vendor.approval_status === 'pending' ? (
+      ) : user.vendor?.approval_status === 'pending' ? (
         // Pending application - show status
         <div className="mt-4">
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
