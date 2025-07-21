@@ -177,54 +177,45 @@ const PetCareServices = () => {
   };
   
 
-// Updated handleSubmit function in your PetCareServices component
 const handleSubmit = async (e) => {
   e.preventDefault();
   if (!selectedService) return;
 
-  // Match the exact field names your backend expects
   const payload = {
-    service_id: selectedService.id,
-    petName: formData.petName || '',           
-    petType: formData.petType || '',           
-    reason: formData.notes || '',              
-    ownerName: userProfile?.name || userProfile?.username || 'Pet Owner',  
-    phone: formData.emergencyContact || '',    
-    email: userProfile?.email || '',     
-    date: formData.date,
-    time: formData.time,
-    status: 'pending',
-    // Add these missing fields that your backend might expect
-    vet_id: null,
-    pet_weight: formData.petWeight || '',
-    vaccination: formData.vaccination || 'unknown'
+    service_id:      selectedService.id,
+    pet_name:        formData.petName,
+    pet_type:        formData.petType,
+    pet_weight:      formData.petWeight,
+    date:            formData.date,
+    time:            formData.time,
+    notes:           formData.notes,
+    emergency_contact: formData.emergencyContact,
+    vaccination:     formData.vaccination,
   };
 
   try {
-    console.log('Sending payload:', payload); // Debug log
-    
+    // 1️⃣ Send to backend (this will trigger your createBooking email)
     const { data } = await axios.post(
       "https://pawprox-6dd216fb1ef5.herokuapp.com/api/bookings",
       payload,
       { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } } 
     );
 
-    console.log('Server response:', data); // Debug log
-
+    // 2️⃣ Grab the bookingId from response
     const bookingIdentifier = data.bookingId;
 
+    // 3️⃣ Now update local history
     const newBooking = {
       ...formData,
-      service: selectedService.name,
-      bookingId: bookingIdentifier,
-      status: 'Confirmed',
-      bookingDate: new Date().toLocaleString(),
+      service:       selectedService.name,
+      bookingId:     bookingIdentifier,
+      status:        'Confirmed',
+      bookingDate:   new Date().toLocaleString(),
     };
-    
     setBookingHistory([newBooking, ...bookingHistory]);
     setBookingStatus('confirmed');
 
-    // Reset form
+    // 4️⃣ Reset form & scroll
     setFormData({
       petName: '',
       petType: '',
@@ -235,23 +226,18 @@ const handleSubmit = async (e) => {
       emergencyContact: '',
       vaccination: 'unknown'
     });
-
     setTimeout(() => {
       document.getElementById('confirmation-message')
-        ?.scrollIntoView({ behavior: 'smooth' });
+        .scrollIntoView({ behavior: 'smooth' });
     }, 100);
 
   } catch (err) {
     console.error("Booking API error:", err);
-    console.error("Error response:", err.response?.data); // More detailed error logging
-    
-    if (err.response?.data?.error) {
-      setError(err.response.data.error);
-    } else {
-      setError("Sorry, we couldn't complete your booking. Please try again.");
-    }
+    setError("Sorry, we couldn't complete your booking. Please try again.");
   }
 };
+
+
 
 
 // Cancel: simply mark the booking as cancelled
