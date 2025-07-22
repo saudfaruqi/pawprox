@@ -206,7 +206,7 @@ useEffect(() => {
       const fullShippingAddress = `${paymentInfo.shippingAddress}, ${paymentInfo.area}, ${paymentInfo.city}, ${paymentInfo.state}, ${paymentInfo.country}`;
   
       const response = await axios.post(
-        "https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders", 
+        "https://pawprox-6dd216fb1ef5.herokuapp.com/api/orders",    
         {
           orderItems: cartItems.map((item) => ({
             productId: item.id,

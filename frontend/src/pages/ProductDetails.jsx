@@ -58,9 +58,9 @@ const ProductDetails = () => {
   // Format price safely
   const formatPrice = (price) => {
     const numPrice = Number(price) || 0;
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat('en-PK', {
+      style: 'currency', 
+      currency: 'PKR', 
       minimumFractionDigits: 2
     }).format(numPrice);
   };

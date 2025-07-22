@@ -605,8 +605,8 @@ const Marketplace = () => {
             </>
           )}
         </div>
-      </div>
-
+      </div> 
+  
       {/* Mobile filters popover */}
       <MobileFilters />
       
