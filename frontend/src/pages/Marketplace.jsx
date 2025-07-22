@@ -488,7 +488,7 @@ const Marketplace = () => {
                           ? product.image
                           : product.image
                             // If you’ve stored "uploads/xyz.jpg" in product.image...
-                            ? `/uploads/${product.image.split("/").pop()}`
+                            ? `https://pawprox-6dd216fb1ef5.herokuapp.com/uploads/${product.image.split("/").pop()}`
                             // …otherwise show the placeholder via our proxy’d endpoint
                             : ``
                       }
