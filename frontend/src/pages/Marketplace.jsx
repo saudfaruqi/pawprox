@@ -491,7 +491,7 @@ const Marketplace = () => {
                             ? `https://pawprox-6dd216fb1ef5.herokuapp.com/uploads/${product.image.split("/").pop()}`
                             // …otherwise show the placeholder via our proxy’d endpoint
                             : ``
-                      }
+                      }     
                       alt={product.title}
                       className="w-full h-48 object-cover transition transform group-hover:scale-110 duration-300"
                       onError={(e) => {
