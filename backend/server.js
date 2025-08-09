@@ -20,10 +20,17 @@ app.disable("etag");
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
 app.use('/uploads', express.static('uploads'));
+
 app.use(cors({
-  origin: [process.env.FRONTEND_ORIGIN, "http://localhost:3000"],
+  origin: [
+    "http://localhost:3000",
+    "https://pawprox.online",
+    "https://www.pawprox.online"
+  ],
   credentials: true,
 }));
+
+
 app.use(bodyParser.json());
 app.use(morgan('dev'));
 
@@ -165,6 +172,13 @@ io.on('connection', (socket) => {
     console.log('Client disconnected:', socket.id);
   });
 });
+
+
+app.get('/api/test', (req, res) => {
+  res.send({ message: "Backend is working fine!" });
+});
+
+
 
 // Start server
 const PORT = process.env.PORT || 5001;

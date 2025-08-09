@@ -1,26 +1,40 @@
-
-
-const db     = require('../config/db');
-const bcrypt = require('bcrypt');
+// controllers/userController.js
+const db           = require('../config/db');
+const bcrypt       = require('bcryptjs');
+const vendorModel  = require('../models/vendorModel');
 
 /**
- * Get the authenticated user's profile.
+ * Get the authenticated user's profile **plus** any vendor record
  */
 exports.getUserProfile = async (req, res) => {
   const userId = req.user.id;
   try {
-  const [users] = await db.query(
-    `SELECT id, name, email, role, phone, profilePic, created_at, preferences
+    // 1️⃣ Fetch the user’s core data
+    const [users] = await db.query(
+      `SELECT 
+         id,
+         name,
+         email,
+         role,
+         phone,
+         profilePic,
+         created_at,
+         preferences
        FROM users
-      WHERE id = ?`,
-    [userId]
-  );
-
+       WHERE id = ?`,
+      [userId]
+    );
 
     if (users.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
-    return res.status(200).json({ user: users[0] });
+    const user = users[0];
+
+    // 2️⃣ Fetch any vendor record for this user (vendorModel returns null if none)
+    const vendor = await vendorModel.getVendorByUserId(userId);
+
+    // 3️⃣ Return both in one payload
+    return res.status(200).json({ user, vendor });
   } catch (error) {
     console.error('Get user profile error:', error);
     return res
@@ -28,6 +42,7 @@ exports.getUserProfile = async (req, res) => {
       .json({ error: 'Server error while fetching user profile' });
   }
 };
+
 
 
 /**

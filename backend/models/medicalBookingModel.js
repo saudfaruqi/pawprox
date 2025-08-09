@@ -1,3 +1,5 @@
+
+
 // backend/models/medicalBookingModel.js
 const db = require("../config/db");
 

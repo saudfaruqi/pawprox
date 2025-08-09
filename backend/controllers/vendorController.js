@@ -15,27 +15,54 @@ exports.getVendorProfile = async (req, res) => {
   }
 };
 
+
 exports.becomeVendor = async (req, res) => {
   const userId = req.user.id;
+
   try {
-    // Check if vendor record already exists
+    // 1️⃣ Fetch any existing vendor record for this user
     const existingVendor = await vendorModel.getVendorByUserId(userId);
+
     if (existingVendor) {
-      return res.status(400).json({ error: "User is already a vendor." });
+      // 2️⃣ If they’re still pending or already approved, block them
+      if (existingVendor.approval_status === "pending" ||
+          existingVendor.approval_status === "approved") {
+        return res.status(400).json({ error: "You cannot reapply at this time." });
+      }
+
+      // 3️⃣ If they were rejected, update their application back to pending
+      const updatedData = {
+        business_name:   req.body.business_name,
+        services:        req.body.services,
+        description:     req.body.description,
+        approval_status: "pending"
+      };
+      await vendorModel.updateVendorById(existingVendor.id, updatedData);
+
+      // 4️⃣ Return 200 OK with the updated record
+      return res.status(200).json({
+        vendorId: existingVendor.id,
+        ...updatedData
+      });
     }
+
+    // 5️⃣ No record exists at all → create a new vendor application
     const vendorData = {
-      user_id: userId,
-      business_name: req.body.business_name,
-      services: req.body.services,
-      description: req.body.description
+      user_id:         userId,
+      business_name:   req.body.business_name,
+      services:        req.body.services,
+      description:     req.body.description,
+      approval_status: "pending"
     };
     const vendorId = await vendorModel.createVendor(vendorData);
-    res.status(201).json({ vendorId, ...vendorData });
+    return res.status(201).json({ vendorId, ...vendorData });
+    
   } catch (error) {
-    console.error("Error becoming vendor:", error);
-    res.status(500).json({ error: "Server error while processing vendor application" });
+    console.error("Error processing vendor application:", error);
+    return res.status(500).json({ error: "Server error while processing vendor application" });
   }
 };
+
 
 exports.updateVendorProfile = async (req, res) => {
   const userId = req.user.id;
@@ -51,3 +78,5 @@ exports.updateVendorProfile = async (req, res) => {
     res.status(500).json({ error: "Server error while updating vendor profile" });
   }
 };
+
+

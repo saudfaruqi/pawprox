@@ -145,7 +145,7 @@ exports.createOrder = async (req, res) => {
           </tr>
           <tr>
             <td style="padding: 8px; font-weight: bold;">Total Amount:</td>
-            <td style="padding: 8px;">$${paymentDetails.amount}</td>
+            <td style="padding: 8px;">${paymentDetails.amount}</td>   
           </tr>
         </table>
 
